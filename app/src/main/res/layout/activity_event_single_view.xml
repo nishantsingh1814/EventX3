@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <include layout="@layout/app_bar" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/view_image"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:scaleType="centerCrop" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#D7D6DC" />
+
+            <TextView
+                android:id="@+id/view_event_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#ffffff"
+                android:fontFamily="sans-serif"
+                android:padding="10dp"
+                android:paddingBottom="7dp"
+                android:paddingTop="7dp"
+                android:textAllCaps="true"
+                android:textColor="#37474F"
+                android:textSize="20dp"
+                android:textStyle="bold" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#D7D6DC" />
+
+            <TextView
+                android:id="@+id/view_event_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#FAFAFA"
+                android:drawableTint="#C1C2C7"
+                android:fontFamily="sans-serif"
+                android:padding="5dp"
+                android:paddingBottom="7dp"
+                android:paddingLeft="5dp"
+                android:paddingTop="7dp"
+                android:textAlignment="gravity"
+                android:textSize="15dp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#D7D6DC" />
+
+            <TextView
+                android:id="@+id/view_event_venue"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#FAFAFA"
+                android:drawableTint="#C1C2C7"
+                android:fontFamily="sans-serif"
+                android:padding="5dp"
+                android:paddingBottom="7dp"
+                android:paddingLeft="5dp"
+                android:paddingTop="7dp"
+                android:textAlignment="gravity"
+                android:textSize="15dp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#D7D6DC" />
+
+            <TextView
+                android:id="@+id/view_event_category"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#FAFAFA"
+                android:fontFamily="sans-serif"
+                android:padding="10dp"
+                android:paddingBottom="7dp"
+                android:paddingTop="7dp"
+                android:textAlignment="gravity"
+                android:textStyle="bold" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#D7D6DC" />
+
+            <TextView
+                android:id="@+id/view_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#FFFFFF"
+                android:fontFamily="sans-serif"
+                android:padding="10dp"
+                android:paddingBottom="7dp"
+                android:paddingTop="7dp"
+                android:textColor="#000000" />
+
+            <Button
+                android:id="@+id/remove_btn"
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:text="Remove this Event"
+                android:textColor="@color/tw__composer_white"
+                android:background="#607D8B"
+                android:visibility="invisible"
+                android:padding="8dp"
+                 />
+        </LinearLayout>
+
+
+    </ScrollView>
+
+</LinearLayout>
+

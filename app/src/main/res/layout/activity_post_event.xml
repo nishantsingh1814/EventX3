@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.eventx.eventx.PostEventActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/white"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginTop="20dp"
+                    android:text="Enter Event Details"
+                    android:textAlignment="center"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <ImageButton
+                    android:id="@+id/post_event_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="240dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_below="@+id/textView"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:layout_marginTop="11dp"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/input_outline"
+                    android:elevation="2dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/add_btn" />
+
+                <EditText
+                    android:id="@+id/post_event_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:background="@drawable/input_outline"
+                    android:drawableLeft="@drawable/ic_event_black_24dp"
+                    android:drawableTint="@color/greyColor"
+                    android:elevation="2dp"
+                    android:fontFamily="sans-serif"
+                    android:hint="Event Name"
+                    android:textColorHint="@color/greyColor" />
+
+                <EditText
+                    android:id="@+id/post_event_venue"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:background="@drawable/input_outline"
+                    android:drawableLeft="@drawable/ic_location_searching_black_24dp"
+                    android:drawableTint="@color/greyColor"
+                    android:elevation="2dp"
+                    android:fontFamily="sans-serif"
+                    android:hint="Event Venue"
+                    android:textColorHint="@color/greyColor" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:background="@drawable/input_outline"
+                    android:elevation="2dp">
+
+                    <Spinner
+                        android:id="@+id/post_event_category"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:entries="@array/event_category"
+                        android:fontFamily="sans-serif"
+                        android:popupBackground="#FFFFFF"
+                        android:spinnerMode="dropdown">
+
+                    </Spinner>
+                </RelativeLayout>
+
+                <EditText
+                    android:id="@+id/post_event_description"
+                    android:layout_width="match_parent"
+                    android:layout_height="100dp"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:background="@drawable/input_outline"
+                    android:drawableLeft="@drawable/ic_create_white_24dp"
+                    android:drawableTint="@color/greyColor"
+                    android:elevation="2dp"
+                    android:fontFamily="sans-serif"
+                    android:hint="Description"
+                    android:textColorHint="@color/greyColor" />
+
+                <Button
+                    android:id="@+id/post_event_start_date_btn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:background="@drawable/input_outline"
+                    android:drawableLeft="@drawable/ic_date_range_black_24dp"
+                    android:drawableTint="@color/greyColor"
+                    android:elevation="2dp"
+                    android:fontFamily="sans-serif"
+                    android:gravity="left|center"
+                    android:text="Event Start Date"
+                    android:textAllCaps="false"
+                    android:textColor="@color/greyColor" />
+
+                <Button
+                    android:id="@+id/post_event_start_time_btn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:background="@drawable/input_outline"
+                    android:drawableLeft="@drawable/ic_watch_later_black_24dp"
+                    android:drawableTint="@color/greyColor"
+                    android:elevation="2dp"
+                    android:fontFamily="sans-serif"
+                    android:gravity="left|center"
+                    android:text="Event Start Time"
+                    android:textAllCaps="false"
+                    android:textColor="#808080" />
+
+
+                <Button
+                    android:id="@+id/post_event_end_date_btn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:background="@drawable/input_outline"
+                    android:drawableLeft="@drawable/ic_date_range_black_24dp"
+                    android:drawableTint="@color/greyColor"
+                    android:elevation="2dp"
+                    android:fontFamily="sans-serif"
+                    android:gravity="left|center"
+                    android:text="Event End Date"
+                    android:textAllCaps="false"
+                    android:textColor="#808080" />
+
+                <Button
+                    android:id="@+id/post_event_end_time_btn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="50dp"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:background="@drawable/input_outline"
+                    android:drawableLeft="@drawable/ic_watch_later_black_24dp"
+                    android:drawableTint="@color/greyColor"
+                    android:elevation="2dp"
+                    android:fontFamily="sans-serif"
+                    android:gravity="left|center"
+                    android:text="Event End Time"
+                    android:textAllCaps="false"
+                    android:textColor="#808080" />
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/post_event_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:background="@color/colorAccent"
+        android:fontFamily="sans-serif"
+        android:text="POST EVENT"
+        android:textColor="@android:color/white" />
+
+
+</RelativeLayout>

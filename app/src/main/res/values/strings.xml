@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">EventX</string>
+
+    <string-array name="tabs">
+        <item>LOGIN</item>
+        <item>SIGN UP</item>
+    </string-array>
+    <string name="open">Open</string>
+    <string name="close">Close</string>
+    <string name="facebook_app_id" translatable="false">1690079651295367</string>
+    <string name="facebook_application_id" translatable="false">1690079651295367</string>
+    <string name="fb_login_protocol_scheme" translatable="false">fb1690079651295367</string>
+    <string-array name="event_category">
+        <item>Technology</item>
+        <item>Workshop</item>
+        <item>Sports</item>
+        <item>Art and Culture</item>
+        <item>Gaming</item>
+        <item>Health</item>
+    </string-array>
+    <string-array name="nav_List">
+        <item>My Profile</item>
+        <item>Create Event</item>
+        <item>My Wishlist</item>
+        <item>Contact Us</item>
+        <item>Feedback</item>
+        <item>Rate us on Play Store</item>
+        <item>Logout</item>
+
+    </string-array>
+</resources>
