@@ -1,36 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <group android:id="@+id/grp1" android:checkableBehavior="single" >
-    <item android:id="@+id/nav_profile"
-        android:icon="@drawable/ic_perm_identity_black_24dp"
-        android:title="My Profile"/>
-    </group>
-    <group android:id="@+id/grp9" android:checkableBehavior="single" >
-        <item android:id="@+id/nav_create_event"
+    <group
+        android:id="@+id/grp1"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_profile"
+            android:icon="@drawable/ic_perm_identity_black_24dp"
+            android:title="My Profile" />
+        <item
+            android:id="@+id/nav_create_event"
             android:icon="@drawable/ic_create_black_24dp"
-            android:title="Create Event"/>
-    </group>
-    <group android:id="@+id/grp2" android:checkableBehavior="single" >
-    <item android:id="@+id/nav_wish_list"
-        android:icon="@drawable/ic_bookmark_black_24dp"
-        android:title="My Wishlist"/>
-    </group>
-    <group android:id="@+id/grp3" android:checkableBehavior="single" >
-    <item android:id="@+id/nav_contact"
-        android:icon="@drawable/ic_contact_mail_black_24dp"
-        android:title="Contact Us"/>
-    </group>
-    <group android:id="@+id/grp4" android:checkableBehavior="single" >
-    <item android:id="@+id/nav_feedback"
-        android:icon="@drawable/ic_feedback_black_24dp"
-        android:title="Feedback"/>
-    </group>
-    <group android:id="@+id/grp7" android:checkableBehavior="single" >
-    <item android:id="@+id/nav_Rate_Us"
-        android:title="Rate Us On Play Store"/>
-    </group>
-    <group android:id="@+id/grp8" android:checkableBehavior="single" >
-    <item android:id="@+id/nav_logout"
-        android:title="Logout"/>
+            android:title="Create Event" />
+        <item
+            android:id="@+id/nav_wish_list"
+            android:icon="@drawable/ic_bookmark_black_24dp"
+            android:title="My Wishlist" />
+        <item
+            android:id="@+id/nav_contact"
+            android:icon="@drawable/ic_contact_mail_black_24dp"
+            android:title="Contact Us" />
+        <item
+            android:id="@+id/nav_feedback"
+            android:icon="@drawable/ic_feedback_black_24dp"
+            android:title="Feedback" />
+        <item
+            android:id="@+id/nav_Rate_Us"
+            android:icon="@drawable/ic_playstore"
+            android:title="Rate Us On Play Store" />
+        <item
+            android:id="@+id/nav_logout"
+            android:icon="@drawable/ic_logout"
+            android:title="Logout" />
     </group>
 </menu>

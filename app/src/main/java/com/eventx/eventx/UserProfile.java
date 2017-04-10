@@ -7,6 +7,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import com.google.firebase.database.Query;
 import android.graphics.Color;
 import android.net.Uri;
 import android.support.design.widget.Snackbar;
@@ -47,7 +48,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import retrofit2.http.Query;
+
 
 public class UserProfile extends AppCompatActivity {
 
@@ -74,12 +75,13 @@ public class UserProfile extends AppCompatActivity {
     private boolean mProcessLike = false;
     private DatabaseReference mDatabaseLike;
     private FirebaseAuth mAuth;
-    private com.google.firebase.database.Query mQuery;
+    private Query mQuery;
     private DatabaseReference mLikeUserDb;
     private DatabaseReference mDatabaseUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_profile);
 
@@ -95,17 +97,18 @@ public class UserProfile extends AppCompatActivity {
 
 
         mDatabaseCurrentUser = FirebaseDatabase.getInstance().getReference().child("Event");
-        Log.i("userhello", "onCreate: "+currentUserId);
         mQuery = mDatabaseCurrentUser.orderByChild("uid").equalTo(currentUserId);
+
+
 
         mStorage = FirebaseStorage.getInstance().getReference().child("profile");
 
         mUserEventList = (RecyclerView) findViewById(R.id.user_Events);
-        mUserEventList.setHasFixedSize(true);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setStackFromEnd(true);
         layoutManager.setReverseLayout(true);
         mUserEventList.setLayoutManager(layoutManager);
+        mUserEventList.setNestedScrollingEnabled(false);
 
         user = FirebaseAuth.getInstance().getCurrentUser();
         mProgress = new ProgressDialog(this);
@@ -159,12 +162,13 @@ public class UserProfile extends AppCompatActivity {
                 dialog.show();
             }
         });
+        setUpViews();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        setUpViews();
+
 
     }
 

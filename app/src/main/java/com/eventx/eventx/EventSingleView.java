@@ -3,10 +3,14 @@ package com.eventx.eventx;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Matrix;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -32,13 +36,20 @@ public class EventSingleView extends AppCompatActivity {
     private TextView eventCategory;
     private TextView eventDescription;
 
+    private Button mapView;
     private Toolbar toolbar;
+
+
 
     private DatabaseReference mDatabaseEvents;
     private FirebaseAuth mAuth;
     private String mPostKey;
 
     private Button mRemoveBtn;
+
+    private String event_state;
+    private String event_venue;
+    private String event_image;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +71,25 @@ public class EventSingleView extends AppCompatActivity {
         eventDescription=(TextView)findViewById(R.id.view_description);
         eventImage=(ImageView)findViewById(R.id.view_image);
         mRemoveBtn=(Button)findViewById(R.id.remove_btn);
+        mapView=(Button)findViewById(R.id.map);
+        mapView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String addressString = event_venue+" "+event_state;
+
+                Uri location=Uri.parse("geo:0,0?").buildUpon().appendQueryParameter("q",addressString).build();
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+
+                intent.setData(location);
+                if (intent.resolveActivity(getPackageManager()) != null) {
+                    startActivity(intent);
+                }
+
+            }
+        });
+
+
+
 
 
         mDatabaseEvents.child(mPostKey).addValueEventListener(new ValueEventListener() {
@@ -67,9 +97,11 @@ public class EventSingleView extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 String event_name=(String)dataSnapshot.child("name").getValue();
                 setTitle("Event: " +event_name);
-                String event_venue=(String)dataSnapshot.child("venue").getValue();
+
+               event_state=(String)dataSnapshot.child("state").getValue();
+                event_venue=(String)dataSnapshot.child("venue").getValue();
                 String event_description=(String)dataSnapshot.child("description").getValue();
-                String event_image=(String)dataSnapshot.child("image").getValue();
+                event_image=(String)dataSnapshot.child("image").getValue();
                 long event_start_date=(long)dataSnapshot.child("start_date_time").getValue();
                 long event_end_date=(long)dataSnapshot.child("end_date_time").getValue();
                 String event_category=(String)dataSnapshot.child("category").getValue();
@@ -90,7 +122,7 @@ public class EventSingleView extends AppCompatActivity {
 
                 eventName.setText(event_name);
                 eventDescription.setText(event_description);
-                eventVenue.setText(event_venue);
+                eventVenue.setText(event_venue+","+event_state);
                 eventCategory.setText(event_category);
                 eventDate.setText(startdateString + " at " + starttimeString + "-\n\n" + enddateString + " at " + endtimeString);
                 Picasso.with(EventSingleView.this).load(event_image).into(eventImage);
@@ -103,6 +135,15 @@ public class EventSingleView extends AppCompatActivity {
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
+            }
+        });
+
+        eventImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent imageIntent=new Intent(EventSingleView.this,ImageAcitivity.class);
+                imageIntent.putExtra("image",event_image);
+                startActivity(imageIntent);
             }
         });
 
@@ -132,12 +173,23 @@ public class EventSingleView extends AppCompatActivity {
         });
     }
 
+
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if(item.getItemId()==android.R.id.home){
             onBackPressed();
         }
-        return super.onOptionsItemSelected(item);
+        return true;
+    }
+
+    private void showMap(Uri geoLocation) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+
+        intent.setData(geoLocation);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
     }
 
     @Override

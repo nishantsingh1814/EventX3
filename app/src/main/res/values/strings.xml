@@ -10,13 +10,14 @@
     <string name="facebook_app_id" translatable="false">1690079651295367</string>
     <string name="facebook_application_id" translatable="false">1690079651295367</string>
     <string name="fb_login_protocol_scheme" translatable="false">fb1690079651295367</string>
+
     <string-array name="event_category">
         <item>Technology</item>
         <item>Workshop</item>
         <item>Sports</item>
         <item>Art and Culture</item>
-        <item>Gaming</item>
         <item>Health</item>
+        <item>Other</item>
     </string-array>
     <string-array name="nav_List">
         <item>My Profile</item>
@@ -28,4 +29,41 @@
         <item>Logout</item>
 
     </string-array>
+
+    <string-array name="state_list">
+        <item>Andhra Pradesh</item>
+        <item>Arunachal Pradesh</item>
+        <item>Assam</item>
+        <item>Bihar</item>
+        <item>Chhattisgarh</item>
+        <item>Delhi</item>
+        <item>Goa</item>
+        <item>Gujarat</item>
+        <item>Haryana</item>
+        <item>Himachal Pradesh</item>
+        <item>Jammu &amp; Kashmir</item>
+        <item>Jharkhand</item>
+        <item>Karnataka</item>
+        <item>Kerala</item>
+        <item>Madhya Pradesh</item>
+        <item>Maharashtra</item>
+        <item>Manipur</item>
+        <item>Meghalaya</item>
+        <item>Mizoram</item>
+        <item>Nagaland</item>
+        <item>Odisha</item>
+        <item>Punjab</item>
+        <item>Rajasthan</item>
+        <item>Sikkim</item>
+        <item>Tamil Nadu</item>
+        <item>Telangana</item>
+        <item>Tripura</item>
+        <item>Uttarakhand</item>
+        <item>Uttar Pradesh</item>
+        <item>West Bengal</item>
+    </string-array>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
 </resources>

@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.net.Uri;
 
 import com.facebook.FacebookSdk;
@@ -16,6 +17,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -64,15 +66,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 
+import static android.R.attr.action;
 import static android.R.attr.data;
 import static android.R.attr.start;
+import static android.R.id.toggle;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "MainActivityhello";
     private static final int RC_SIGN_IN = 1;
     private Toolbar toolbar;
-    private ActionBarDrawerToggle mToggle;
     private FloatingActionButton mAddFab;
 
 
@@ -80,8 +83,6 @@ public class MainActivity extends AppCompatActivity {
 
     private RecyclerView mEventList;
 
-
-    private NavigationView mNavigation;
 
     private FirebaseDatabase mFirebaseDatabase;
     private DatabaseReference mDatabaseUsers;
@@ -96,29 +97,46 @@ public class MainActivity extends AppCompatActivity {
     private StorageReference mProfilePhotosStorageReference;
 
     private DatabaseReference mLikeUserDb;
+    DrawerLayout mDrawerLayout;
+    private Spinner mCategorySpinner;
 
+    private Spinner mLocationSpinner;
 
-    private ArrayAdapter<String> spinnerCategory;
-    private DrawerLayout mDrawerLayout;
+    private String mLocation = "Location";
+    private String mCategory = "Category";
+    //private ArrayAdapter<String> spinnerCategory;
     private Query query;
     private DatabaseReference mDatabaseLikeCurrentPost;
 
     private boolean mProcessLike = false;
 
+    private int eventPosition;
+
+    private ArrayAdapter<String> locationAdapter;
+    private ArrayAdapter<String> categoryAdapter;
+    NavigationView mNavigation;
+
+    private LinearLayoutManager layoutManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
+        eventPosition = 0;
 
 
         mFirebaseStorage = FirebaseStorage.getInstance();
-        mDatabaseUsers=FirebaseDatabase.getInstance().getReference().child("Users");
+        mDatabaseUsers = FirebaseDatabase.getInstance().getReference().child("Users");
 
         mDatabaseEvents = mFirebaseDatabase.getReference().child("Event");
-        query = mDatabaseEvents;
+
+        query = mDatabaseEvents.orderByChild("start_date_time");
+
         mProfilePhotosStorageReference = mFirebaseStorage.getReference().child("profile");
 
         mDatabaseLike = FirebaseDatabase.getInstance().getReference().child("Like");
@@ -128,51 +146,92 @@ public class MainActivity extends AppCompatActivity {
         toolbar = (Toolbar) findViewById(R.id.app_bar);
         setSupportActionBar(toolbar);
 
+        mCategorySpinner = (Spinner) findViewById(R.id.post_event_category);
+        mLocationSpinner = (Spinner) findViewById(R.id.post_event_state);
+
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mNavigation = (NavigationView) findViewById(R.id.nav_bar);
+        ActionBarDrawerToggle mToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        mDrawerLayout.addDrawerListener(mToggle);
+        mToggle.syncState();
+
+        mNavigation = (NavigationView) findViewById(R.id.nav_view);
 
         ArrayList<String> list = new ArrayList<>();
-        list.add("All Events");
+        list.add("Category");
         list.add("Technology");
         list.add("Workshop");
         list.add("Sports");
         list.add("Art and Culture");
-        list.add("Gaming");
         list.add("Health");
+        list.add("Other");
 
-        spinnerCategory = new ArrayAdapter<>(this, R.layout.layout_drop_title, list);
-        spinnerCategory.setDropDownViewResource(R.layout.layout_drop_list);
+        categoryAdapter = new ArrayAdapter<String>(this, R.layout.layout_drop_title, list);
+        categoryAdapter.setDropDownViewResource(R.layout.layout_drop_list);
 
-        Spinner mNavigationSpinner = new Spinner(getSupportActionBar().getThemedContext());
-        mNavigationSpinner.setAdapter(spinnerCategory);
-        mNavigationSpinner.setGravity(8388613);
-        toolbar.addView(mNavigationSpinner);
-////////////////////////////////////////////////////////////////////////////////
-        mNavigationSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        mCategorySpinner.setAdapter(categoryAdapter);
+
+        ArrayList<String> stateList = new ArrayList<>();
+        stateList.add("Location");
+        stateList.add("Andhra Pradesh");
+        stateList.add("Arunachal Pradesh");
+        stateList.add("Assam");
+        stateList.add("Bihar");
+        stateList.add("Chhattisgarh");
+        stateList.add("Delhi");
+        stateList.add("Goa");
+        stateList.add("Gujarat");
+        stateList.add("Haryana");
+        stateList.add("Himachal Pradesh");
+        stateList.add("Jammu & Kashmir");
+        stateList.add("Jharkhand");
+        stateList.add("Karnataka");
+        stateList.add("Kerala");
+        stateList.add("Madhya Pradesh");
+        stateList.add("Maharashtra");
+        stateList.add("Manipur");
+        stateList.add("Meghalaya");
+        stateList.add("Mizoram");
+        stateList.add("Nagaland");
+        stateList.add("Odisha");
+        stateList.add("Punjab");
+        stateList.add("Rajasthan");
+        stateList.add("Sikkim");
+        stateList.add("Tamil Nadu");
+        stateList.add("Telangana");
+        stateList.add("Tripura");
+        stateList.add("Uttarakhand");
+        stateList.add("Uttar Pradesh");
+        stateList.add("West Bengal");
+
+
+        mLocationSpinner.getBackground().setColorFilter(Color.parseColor("#ffffff"), PorterDuff.Mode.SRC_ATOP);
+        mCategorySpinner.getBackground().setColorFilter(Color.parseColor("#ffffff"), PorterDuff.Mode.SRC_ATOP);
+        locationAdapter = new ArrayAdapter<>(this, R.layout.layout_drop_title, stateList);
+        locationAdapter.setDropDownViewResource(R.layout.layout_drop_list);
+
+        mLocationSpinner.setAdapter(locationAdapter);
+
+
+        mLocationSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position == 1) {
-                    query = mDatabaseEvents.orderByChild("category").equalTo("Technology");
+                mLocation = mLocationSpinner.getSelectedItem().toString();
+                if (mLocation.equals("Location")) {
+                    if (mCategory.equals("Category")) {
+                        query = mDatabaseEvents.orderByChild("start_date_time");
+                        setUpViews();
+                        return;
+                    }
+                    query = mDatabaseEvents.orderByChild("category").equalTo(mCategory);
                     setUpViews();
-                } else if (position == 2) {
-                    query = mDatabaseEvents.orderByChild("category").equalTo("Workshop");
-                    setUpViews();
-                } else if (position == 3) {
-                    query = mDatabaseEvents.orderByChild("category").equalTo("Sports");
-                    setUpViews();
-                } else if (position == 4) {
-                    query = mDatabaseEvents.orderByChild("category").equalTo("Art and Culture");
-                    setUpViews();
-                } else if (position == 5) {
-                    query = mDatabaseEvents.orderByChild("category").equalTo("Gaming");
-                    setUpViews();
-                } else if (position == 6) {
-                    query = mDatabaseEvents.orderByChild("category").equalTo("Health");
-                    setUpViews();
-                } else {
-                    query = mDatabaseEvents;
-                    setUpViews();
+                    return;
                 }
+                if (mCategory.equals("Category")) {
+                    query = mDatabaseEvents.orderByChild("state").equalTo(mLocation);
+                } else {
+                    query = mDatabaseEvents.orderByChild("state_category").equalTo(mLocation + "_" + mCategory);
+                }
+                setUpViews();
             }
 
             @Override
@@ -180,7 +239,37 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-////////////////////////////////////////////////////////////////////////////////
+        mCategorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                mCategory = mCategorySpinner.getSelectedItem().toString();
+
+                if (mCategory.equals("Category")) {
+                    if (mLocation.equals("Location")) {
+                        query = mDatabaseEvents.orderByChild("start_date_time");
+                        setUpViews();
+                        return;
+                    }
+                    query = mDatabaseEvents.orderByChild("state").equalTo(mLocation);
+                    setUpViews();
+                    return;
+                }
+                if (mLocation.equals("Location")) {
+                    query = mDatabaseEvents.orderByChild("category").equalTo(mCategory);
+                } else {
+                    query = mDatabaseEvents.orderByChild("state_category").equalTo(mLocation + "_" + mCategory);
+                }
+
+                setUpViews();
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
         mNavigation.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -195,7 +284,7 @@ public class MainActivity extends AppCompatActivity {
                     logout();
                 }
                 if (item.getItemId() == R.id.nav_wish_list) {
-                    startActivity(new Intent(MainActivity.this,WishlistActivity.class));
+                    startActivity(new Intent(MainActivity.this, WishlistActivity.class));
                 }
 
                 if (item.getItemId() == R.id.nav_contact) {
@@ -223,16 +312,23 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(MainActivity.this, "No suitable Apps Found", Toast.LENGTH_SHORT);
                     }
                 }
-                return false;
+                if (item.getItemId() == R.id.nav_Rate_Us) {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + getPackageName())));
+                }
+                DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+                drawer.closeDrawer(GravityCompat.START);
+                return true;
             }
         });
 
         mEventList = (RecyclerView) findViewById(R.id.event_list);
-        mEventList.setHasFixedSize(true);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        layoutManager.setReverseLayout(true);
-        layoutManager.setStackFromEnd(true);
+        layoutManager = new LinearLayoutManager(MainActivity.this);
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+//        layoutManager.setReverseLayout(true);
+//        layoutManager.setStackFromEnd(true);
         mEventList.setLayoutManager(layoutManager);
+        mEventList.setHasFixedSize(true);
+
 
         mToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.open, R.string.close);
 
@@ -254,9 +350,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user != null) {
-
-                } else {
+                if (user == null) {
                     startActivityForResult(
                             AuthUI.getInstance()
                                     .createSignInIntentBuilder()
@@ -271,25 +365,25 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
-
+        setUpViews();
     }
 
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (mToggle.onOptionsItemSelected(item)) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
 
     @Override
     protected void onStart() {
         super.onStart();
-
-        setUpViews();
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
 
     private void setUpViews() {
 
@@ -299,11 +393,11 @@ public class MainActivity extends AppCompatActivity {
 
 
             @Override
-            protected void populateViewHolder(EventViewHolder viewHolder, Event model, int position) {
+            protected void populateViewHolder(EventViewHolder viewHolder, Event model, final int position) {
 
                 final String post_key = getRef(position).getKey();
                 viewHolder.setName(model.getName());
-                viewHolder.setLocation(model.getVenue());
+                viewHolder.setLocation(model.getVenue() + "," + model.getState());
                 viewHolder.setCategory(model.getCategory());
                 viewHolder.setInterested(post_key);
                 viewHolder.setStartDateTime(model.getStart_date_time());
@@ -312,9 +406,29 @@ public class MainActivity extends AppCompatActivity {
                 viewHolder.mView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        eventPosition = position;
                         Intent singleEventIntent = new Intent(MainActivity.this, EventSingleView.class);
                         singleEventIntent.putExtra("event_id", post_key);
-                        startActivity(singleEventIntent, ActivityOptions.makeSceneTransitionAnimation(MainActivity.this).toBundle());
+                        Log.i(TAG, "onclick " + eventPosition);
+                        startActivity(singleEventIntent);
+                    }
+                });
+
+                viewHolder.mShareBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        try {
+                            Intent i = new Intent(Intent.ACTION_SEND);
+                            i.setType("text/plain");
+                            i.putExtra(Intent.EXTRA_SUBJECT, "EventX");
+                            String sAux = "\nHey i just found an interesting event here\n\n";
+                            sAux = sAux + "https://eventx-77033.firebaseapp.com/Event.html?eventid=" + post_key + "\n\n" + "Download our app here \n";
+                            sAux = sAux + "https://play.google.com/store/apps/details?id=com.eventx.eventx \n\n";
+                            i.putExtra(Intent.EXTRA_TEXT, sAux);
+                            startActivity(Intent.createChooser(i, "complete action using"));
+                        } catch (Exception e) {
+                            //e.toString();
+                        }
                     }
                 });
                 viewHolder.mLikeBtn.setOnClickListener(new View.OnClickListener() {
@@ -326,8 +440,8 @@ public class MainActivity extends AppCompatActivity {
                         mDatabaseLikeCurrentPost = mDatabaseLike.child(post_key);
                         mDatabaseLike.keepSynced(true);
                         mDatabaseLikeCurrentPost.keepSynced(true);
-                        if(mAuth.getCurrentUser()!=null){
-                            mLikeUserDb=mDatabaseUsers.child(mAuth.getCurrentUser().getUid()).child("Like");
+                        if (mAuth.getCurrentUser() != null) {
+                            mLikeUserDb = mDatabaseUsers.child(mAuth.getCurrentUser().getUid()).child("Like");
                         }
                         mDatabaseLikeCurrentPost.addValueEventListener(new ValueEventListener() {
                             @Override
@@ -365,7 +479,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onPause() {
+
         super.onPause();
+
         if (mAuthListener != null) {
             mAuth.removeAuthStateListener(mAuthListener);
         }
@@ -374,6 +490,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        mNavigation.getMenu().findItem(R.id.nav_contact).setChecked(false);
+        mNavigation.getMenu().findItem(R.id.nav_create_event).setChecked(false);
+        mNavigation.getMenu().findItem(R.id.nav_feedback).setChecked(false);
+        mNavigation.getMenu().findItem(R.id.nav_logout).setChecked(false);
+        mNavigation.getMenu().findItem(R.id.nav_profile).setChecked(false);
+        mNavigation.getMenu().findItem(R.id.nav_Rate_Us).setChecked(false);
+        mNavigation.getMenu().findItem(R.id.nav_wish_list).setChecked(false);
+
+
         mAuth.addAuthStateListener(mAuthListener);
 
     }
@@ -382,13 +508,18 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RC_SIGN_IN) {
+            Log.i(TAG, "onActivityResult: " + resultCode);
+
             IdpResponse response = IdpResponse.fromResultIntent(data);
             if (resultCode == RESULT_OK) {
+
+
                 if (!response.getProviderType().equals("google.com") && !response.getProviderType().equals("facebook.com")) {
                     startActivity(new Intent(this, SetProfilePic.class));
                     finish();
                 }
             } else {
+                Log.i(TAG, "onActivityResult: " + resultCode);
                 // Sign in failed
                 if (response == null) {
                     // User pressed back button
@@ -424,6 +555,7 @@ public class MainActivity extends AppCompatActivity {
         View mView;
 
         ImageButton mLikeBtn;
+        ImageButton mShareBtn;
 
         DatabaseReference mDatabaseLike;
         FirebaseAuth mAuth;
@@ -432,7 +564,7 @@ public class MainActivity extends AppCompatActivity {
             super(itemView);
             mView = itemView;
             mLikeBtn = (ImageButton) mView.findViewById(R.id.like_btn);
-
+            mShareBtn = (ImageButton) mView.findViewById(R.id.share_btn);
             mAuth = FirebaseAuth.getInstance();
 
         }
@@ -487,20 +619,18 @@ public class MainActivity extends AppCompatActivity {
             post_category.setText(category);
         }
 
-        public void setInterested(String post_key){
-            final TextView interested=(TextView)mView.findViewById(R.id.interested_people);
+        public void setInterested(String post_key) {
+            final TextView interested = (TextView) mView.findViewById(R.id.interested_people);
 
             FirebaseDatabase.getInstance().getReference().child("Like").child(post_key).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    long count =dataSnapshot.getChildrenCount();
-                    if(count==0){
-                        interested.setText( "Nobody interested");
-                    }
-                    else if(count==1){
-                        interested.setText(count +" person interested");
-                    }
-                    else {
+                    long count = dataSnapshot.getChildrenCount();
+                    if (count == 0) {
+                        interested.setText("Nobody interested");
+                    } else if (count == 1) {
+                        interested.setText(count + " person interested");
+                    } else {
                         interested.setText(count + " people interested");
                     }
                 }
@@ -528,6 +658,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
+
     }
 
     public boolean isInternetAvailable() {

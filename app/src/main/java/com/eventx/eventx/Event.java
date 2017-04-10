@@ -9,14 +9,44 @@ public class Event {
     private long end_date_time;
     private long start_date_time;
 
+    private String uid;
+    private String state_category;
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
+    public String getState_category() {
+        return state_category;
+    }
+
+    public void setState_category(String state_category) {
+        this.state_category = state_category;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    private String state;
+
     public Event(){
 
     }
 
-    public Event(String category, String description, String image, String name, long start_date_time, long end_date_time) {
+    public Event(String category, String description, String image, String name, long start_date_time, long end_date_time,String state) {
         this.category = category;
         this.description = description;
         this.image = image;
+        this.state=state;
         this.name = name;
         this.start_date_time = start_date_time;
         this.end_date_time = end_date_time;

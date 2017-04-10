@@ -54,6 +54,7 @@ public class PostEventActivity extends AppCompatActivity {
     private Button mPostEventStartTimeBtn;
     private Button mPostEventEndDateBtn;
     private Button mPostEventEndTimeBtn;
+    private Spinner mPostEventState;
 
     private Button mPostEventBtn;
 
@@ -98,6 +99,7 @@ public class PostEventActivity extends AppCompatActivity {
         mPostEventStartTimeBtn = (Button) findViewById(R.id.post_event_start_time_btn);
         mPostEventEndDateBtn = (Button) findViewById(R.id.post_event_end_date_btn);
         mPostEventEndTimeBtn = (Button) findViewById(R.id.post_event_end_time_btn);
+        mPostEventState=(Spinner)findViewById(R.id.post_event_state);
         mPostEventBtn = (Button) findViewById(R.id.post_event_btn);
         mProgress = new ProgressDialog(this);
 
@@ -249,6 +251,7 @@ public class PostEventActivity extends AppCompatActivity {
         final String mEventVenue = mPostEventVenue.getText().toString().trim();
         final String mEventCategory = mPostEventCategory.getSelectedItem().toString();
         final String mEventDescription = mPostEventDescription.getText().toString().trim();
+        final String mEventState=mPostEventState.getSelectedItem().toString();
         String mEventStartDate = mPostEventStartDateBtn.getText().toString();
         String mEventStartTime = mPostEventStartTimeBtn.getText().toString();
         String mEventEndDate = mPostEventEndDateBtn.getText().toString();
@@ -272,6 +275,8 @@ public class PostEventActivity extends AppCompatActivity {
                     newPost.child("end_date_time").setValue((epochEnd));
                     newPost.child("image").setValue(downloadUrl.toString());
                     newPost.child("uid").setValue(mCurrentUser.getUid());
+                    newPost.child("state").setValue(mEventState);
+                    newPost.child("state_category").setValue(mEventState+"_"+mEventCategory);
 
 
                     mProgress.dismiss();
