@@ -4,6 +4,8 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_CALENDAR" />
+    <uses-permission android:name="android.permission.WRITE_CALENDAR" />
 
     <application
         android:name=".EventX"
@@ -45,7 +47,21 @@
         <activity
             android:name=".SetProfilePic"
             android:screenOrientation="portrait" />
-        <activity android:name=".EventSingleView" />
+        <activity android:name=".EventSingleView">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="eventx-77033.firebaseapp.com"
+                    android:scheme="http" />
+                <data
+                    android:host="eventx-77033.firebaseapp.com"
+                    android:scheme="https" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".UserProfile"
             android:screenOrientation="portrait">
@@ -54,7 +70,8 @@
                 android:value=".MainActivity" />
         </activity>
         <activity android:name=".WishlistActivity" />
-        <activity android:name=".ImageAcitivity"></activity>
+        <activity android:name=".ImageAcitivity" />
+        <activity android:name=".SearchActivity"></activity>
     </application>
 
 </manifest>

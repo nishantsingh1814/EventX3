@@ -45,6 +45,17 @@
             android:textAllCaps="true"
             android:textStyle="bold" />
 
+        <TextView
+            android:id="@+id/no_item"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:layout_gravity="center_horizontal|center_vertical"
+            android:textStyle="bold"
+            android:visibility="gone"
+            android:textSize="15sp"
+            android:text="You have not created any event yet"
+            />
         <android.support.v7.widget.RecyclerView
             android:id="@+id/user_Events"
             android:layout_width="match_parent"

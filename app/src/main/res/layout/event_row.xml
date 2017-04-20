@@ -17,7 +17,8 @@
         <ImageView
             android:id="@+id/post_image"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="180dp"
+            android:transitionName="trans"
             android:adjustViewBounds="true"
             android:scaleType="centerCrop"
             android:src="@drawable/add_btn" />

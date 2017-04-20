@@ -62,7 +62,7 @@
         <item>Uttar Pradesh</item>
         <item>West Bengal</item>
     </string-array>
-
+    <string name="banner_ad_unit_id">ca-app-pub-1756992528854231/5443708504</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 

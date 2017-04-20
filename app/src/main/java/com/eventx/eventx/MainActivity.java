@@ -1,11 +1,14 @@
 package com.eventx.eventx;
 
-import android.app.ActivityOptions;
-import android.app.AlertDialog;
+import android.*;
+import android.Manifest;
+import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.net.Uri;
@@ -13,23 +16,30 @@ import android.net.Uri;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
 
+import android.provider.CalendarContract;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.transition.TransitionManager;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ShareCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -66,10 +76,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 
-import static android.R.attr.action;
-import static android.R.attr.data;
-import static android.R.attr.start;
-import static android.R.id.toggle;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -92,7 +99,6 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth.AuthStateListener mAuthListener;
 
     private DatabaseReference mDatabaseEvents;
-    private ChildEventListener mChildEventListener;
     private FirebaseStorage mFirebaseStorage;
     private StorageReference mProfilePhotosStorageReference;
 
@@ -104,13 +110,12 @@ public class MainActivity extends AppCompatActivity {
 
     private String mLocation = "Location";
     private String mCategory = "Category";
-    //private ArrayAdapter<String> spinnerCategory;
     private Query query;
     private DatabaseReference mDatabaseLikeCurrentPost;
 
+
     private boolean mProcessLike = false;
 
-    private int eventPosition;
 
     private ArrayAdapter<String> locationAdapter;
     private ArrayAdapter<String> categoryAdapter;
@@ -118,16 +123,32 @@ public class MainActivity extends AppCompatActivity {
 
     private LinearLayoutManager layoutManager;
 
+    private static int firstVisibleInListview;
+
+
+    SharedPreferences sp;
+    SharedPreferences.Editor edit;
+
+
+    private int check = 0;
+
+    private SwipeRefreshLayout mRefreshLayout;
+
+    Event temp;
+    int callId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+        sp = getSharedPreferences("EventX", MODE_PRIVATE);
+        edit = sp.edit();
+        callId = sp.getInt("callId", 1);
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mAuth = FirebaseAuth.getInstance();
-
-        eventPosition = 0;
 
 
         mFirebaseStorage = FirebaseStorage.getInstance();
@@ -146,6 +167,7 @@ public class MainActivity extends AppCompatActivity {
         toolbar = (Toolbar) findViewById(R.id.app_bar);
         setSupportActionBar(toolbar);
 
+        mRefreshLayout=(SwipeRefreshLayout)findViewById(R.id.swipeRefreshLayout);
         mCategorySpinner = (Spinner) findViewById(R.id.post_event_category);
         mLocationSpinner = (Spinner) findViewById(R.id.post_event_state);
 
@@ -215,23 +237,25 @@ public class MainActivity extends AppCompatActivity {
         mLocationSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                mLocation = mLocationSpinner.getSelectedItem().toString();
-                if (mLocation.equals("Location")) {
-                    if (mCategory.equals("Category")) {
-                        query = mDatabaseEvents.orderByChild("start_date_time");
+                if (check++ > 1) {
+                    mLocation = mLocationSpinner.getSelectedItem().toString();
+                    if (mLocation.equals("Location")) {
+                        if (mCategory.equals("Category")) {
+                            query = mDatabaseEvents.orderByChild("start_date_time");
+                            setUpViews();
+                            return;
+                        }
+                        query = mDatabaseEvents.orderByChild("category").equalTo(mCategory);
                         setUpViews();
                         return;
                     }
-                    query = mDatabaseEvents.orderByChild("category").equalTo(mCategory);
+                    if (mCategory.equals("Category")) {
+                        query = mDatabaseEvents.orderByChild("state").equalTo(mLocation);
+                    } else {
+                        query = mDatabaseEvents.orderByChild("state_category").equalTo(mLocation + "_" + mCategory);
+                    }
                     setUpViews();
-                    return;
                 }
-                if (mCategory.equals("Category")) {
-                    query = mDatabaseEvents.orderByChild("state").equalTo(mLocation);
-                } else {
-                    query = mDatabaseEvents.orderByChild("state_category").equalTo(mLocation + "_" + mCategory);
-                }
-                setUpViews();
             }
 
             @Override
@@ -242,26 +266,28 @@ public class MainActivity extends AppCompatActivity {
         mCategorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                mCategory = mCategorySpinner.getSelectedItem().toString();
+                if (check++ > 1) {
+                    mCategory = mCategorySpinner.getSelectedItem().toString();
 
-                if (mCategory.equals("Category")) {
-                    if (mLocation.equals("Location")) {
-                        query = mDatabaseEvents.orderByChild("start_date_time");
+                    if (mCategory.equals("Category")) {
+                        if (mLocation.equals("Location")) {
+                            query = mDatabaseEvents.orderByChild("start_date_time");
+                            setUpViews();
+                            return;
+                        }
+                        query = mDatabaseEvents.orderByChild("state").equalTo(mLocation);
                         setUpViews();
                         return;
                     }
-                    query = mDatabaseEvents.orderByChild("state").equalTo(mLocation);
+                    if (mLocation.equals("Location")) {
+                        query = mDatabaseEvents.orderByChild("category").equalTo(mCategory);
+                    } else {
+                        query = mDatabaseEvents.orderByChild("state_category").equalTo(mLocation + "_" + mCategory);
+                    }
+
                     setUpViews();
-                    return;
-                }
-                if (mLocation.equals("Location")) {
-                    query = mDatabaseEvents.orderByChild("category").equalTo(mCategory);
-                } else {
-                    query = mDatabaseEvents.orderByChild("state_category").equalTo(mLocation + "_" + mCategory);
-                }
 
-                setUpViews();
-
+                }
             }
 
             @Override
@@ -273,21 +299,45 @@ public class MainActivity extends AppCompatActivity {
         mNavigation.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+                drawer.closeDrawer(GravityCompat.START);
+
                 if (item.getItemId() == R.id.nav_profile) {
+
                     Intent userProfile = new Intent(MainActivity.this, UserProfile.class);
                     startActivity(userProfile);
+                    overridePendingTransition(R.anim.slide_right, R.anim.no_change);
                 }
                 if (item.getItemId() == R.id.nav_create_event) {
+
                     startActivity(new Intent(MainActivity.this, PostEventActivity.class));
+                    overridePendingTransition(R.anim.slide_up, R.anim.no_change);
+
+                }
+                if(item.getItemId()==R.id.nav_share){
+
+                    Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+                    sharingIntent.setType("text/plain");
+
+                    sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Download EventX");
+                    sharingIntent.putExtra(Intent.EXTRA_TEXT, "Download EventX App "+"\n" + "https://jq49b.app.goo.gl/eNh4");
+                    startActivity(Intent.createChooser(sharingIntent,"Choose App"));
+                    overridePendingTransition(R.anim.slide_right, R.anim.no_change);
+
+
                 }
                 if (item.getItemId() == R.id.nav_logout) {
                     logout();
                 }
                 if (item.getItemId() == R.id.nav_wish_list) {
+
                     startActivity(new Intent(MainActivity.this, WishlistActivity.class));
+                    overridePendingTransition(R.anim.slide_right, R.anim.no_change);
+
                 }
 
                 if (item.getItemId() == R.id.nav_contact) {
+
                     Intent intent = new Intent();
                     intent.setAction(Intent.ACTION_SENDTO);
 
@@ -300,6 +350,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 if (item.getItemId() == R.id.nav_feedback) {
+
                     Intent intent = new Intent();
                     intent.setAction(Intent.ACTION_SENDTO);
 
@@ -313,10 +364,10 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 if (item.getItemId() == R.id.nav_Rate_Us) {
+
+
                     startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + getPackageName())));
                 }
-                DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-                drawer.closeDrawer(GravityCompat.START);
                 return true;
             }
         });
@@ -328,6 +379,27 @@ public class MainActivity extends AppCompatActivity {
 //        layoutManager.setStackFromEnd(true);
         mEventList.setLayoutManager(layoutManager);
         mEventList.setHasFixedSize(true);
+
+
+        firstVisibleInListview = layoutManager.findFirstVisibleItemPosition();
+        mEventList.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            private int mLastFirstVisibleItem;
+
+
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (dy > 0)
+                    mAddFab.hide();
+                else if (dy < 0)
+                    mAddFab.show();
+            }
+        });
 
 
         mToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.open, R.string.close);
@@ -342,6 +414,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(MainActivity.this, PostEventActivity.class));
+                overridePendingTransition(R.anim.slide_up, R.anim.no_change);
+
             }
         });
 
@@ -365,8 +439,47 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
+
+        mRefreshLayout.setColorSchemeColors(Color.parseColor("#00ADB5"));
+        mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                setUpViews();
+                mRefreshLayout.setRefreshing(false);
+            }
+        });
         setUpViews();
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        getMenuInflater().inflate(R.menu.menu_search, menu);
+        MenuItem item = menu.findItem(R.id.menu_search);
+        SearchView searchView = (SearchView) item.getActionView();
+        searchView.setQueryHint("Search for Events..");
+
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String queryText) {
+                Intent searchIntent=new Intent(MainActivity.this,SearchActivity.class);
+                searchIntent.putExtra("searchString",queryText);
+                startActivity(searchIntent);
+                overridePendingTransition(R.anim.slide_up,R.anim.no_change);
+
+
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+        return super.onCreateOptionsMenu(menu);
+    }
+
 
 
     @Override
@@ -376,7 +489,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
@@ -387,14 +499,15 @@ public class MainActivity extends AppCompatActivity {
 
     private void setUpViews() {
 
-        FirebaseRecyclerAdapter<Event, EventViewHolder> firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<Event, EventViewHolder>(
+        final FirebaseRecyclerAdapter<Event, EventViewHolder> firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<Event, EventViewHolder>(
                 Event.class, R.layout.event_row, EventViewHolder.class, query
         ) {
 
 
             @Override
-            protected void populateViewHolder(EventViewHolder viewHolder, Event model, final int position) {
+            protected void populateViewHolder(EventViewHolder viewHolder, final Event model, final int position) {
 
+                temp = model;
                 final String post_key = getRef(position).getKey();
                 viewHolder.setName(model.getName());
                 viewHolder.setLocation(model.getVenue() + "," + model.getState());
@@ -406,11 +519,10 @@ public class MainActivity extends AppCompatActivity {
                 viewHolder.mView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        eventPosition = position;
                         Intent singleEventIntent = new Intent(MainActivity.this, EventSingleView.class);
                         singleEventIntent.putExtra("event_id", post_key);
-                        Log.i(TAG, "onclick " + eventPosition);
                         startActivity(singleEventIntent);
+                        overridePendingTransition(R.anim.slide_right, R.anim.no_change);
                     }
                 });
 
@@ -418,14 +530,18 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         try {
-                            Intent i = new Intent(Intent.ACTION_SEND);
-                            i.setType("text/plain");
-                            i.putExtra(Intent.EXTRA_SUBJECT, "EventX");
-                            String sAux = "\nHey i just found an interesting event here\n\n";
-                            sAux = sAux + "https://eventx-77033.firebaseapp.com/Event.html?eventid=" + post_key + "\n\n" + "Download our app here \n";
-                            sAux = sAux + "https://play.google.com/store/apps/details?id=com.eventx.eventx \n\n";
-                            i.putExtra(Intent.EXTRA_TEXT, sAux);
-                            startActivity(Intent.createChooser(i, "complete action using"));
+                            Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+                            sharingIntent.setType("text/plain");
+
+                            Uri data = Uri.parse("https://jq49b.app.goo.gl/eNh4");
+                            Uri.Builder link = new Uri.Builder();
+                            link.scheme("https").authority("eventx-77033.firebaseapp.com").appendPath("Event.html").appendQueryParameter("eventid", post_key);
+                            sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "EventX");
+                            sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, "Hey i just found an event here" + "\n\n" + link.build().toString() + "\n\nDownload our android app here \n" + data);
+                            startActivity(Intent.createChooser(sharingIntent,"Select App"));
+                            overridePendingTransition(R.anim.slide_right, R.anim.no_change);
+
+
                         } catch (Exception e) {
                             //e.toString();
                         }
@@ -451,13 +567,49 @@ public class MainActivity extends AppCompatActivity {
                                         mDatabaseLike.child(post_key).child(mAuth.getCurrentUser().getUid()).removeValue();
                                         mLikeUserDb.child(post_key).removeValue();
                                         Snackbar.make(v, "Removed from your WishList", Snackbar.LENGTH_LONG).show();
-
                                         mProcessLike = false;
+
+                                        if (ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
+
+                                            return;
+                                        }
+                                        Uri deleteUri = null;
+                                        if (sp.getLong(model.getName(), -1) == -1) {
+                                            return;
+                                        }
+                                        deleteUri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, sp.getLong(model.getName(), -1));
+                                        int rows = getContentResolver().delete(deleteUri, null, null);
                                     } else {
                                         mLikeUserDb.child(post_key).setValue(post_key);
                                         mDatabaseLike.child(post_key).child(mAuth.getCurrentUser().getUid()).setValue(mAuth.getCurrentUser().getUid());
+
+
                                         mProcessLike = false;
+
                                         Snackbar.make(v, "Added to your WishList", Snackbar.LENGTH_LONG).show();
+
+                                        if (ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
+                                            String[] permissions = {Manifest.permission.WRITE_CALENDAR};
+                                            ActivityCompat.requestPermissions(MainActivity.this, permissions, 1);
+
+                                            return;
+                                        }
+                                        ContentResolver cr = getContentResolver();
+                                        ContentValues values = new ContentValues();
+                                        values.put(CalendarContract.Events.DTSTART, model.getStart_date_time());
+                                        values.put(CalendarContract.Events.DTEND, model.getEnd_date_time());
+                                        values.put(CalendarContract.Events.TITLE, model.getName());
+                                        values.put(CalendarContract.Events.DESCRIPTION, model.getDescription());
+                                        values.put(CalendarContract.Events.CALENDAR_ID, callId++);
+                                        edit.putInt("callId", callId);
+
+                                        values.put(CalendarContract.Events.EVENT_TIMEZONE, "America/Los_Angeles");
+                                        Uri uri = cr.insert(CalendarContract.Events.CONTENT_URI, values);
+                                        long eventID = Long.parseLong(uri.getLastPathSegment());
+
+                                        edit.putLong(model.getName(), eventID);
+                                        edit.commit();
+
 
                                     }
                                 }
@@ -475,7 +627,26 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         mEventList.setAdapter(firebaseRecyclerAdapter);
+
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(!dataSnapshot.hasChildren()){
+                    TextView noEvents=(TextView)findViewById(R.id.no_item);
+                    noEvents.setVisibility(View.VISIBLE);
+                }else{
+                    TextView noEvents=(TextView)findViewById(R.id.no_item);
+                    noEvents.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
+
 
     @Override
     protected void onPause() {
@@ -491,6 +662,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
+
         mNavigation.getMenu().findItem(R.id.nav_contact).setChecked(false);
         mNavigation.getMenu().findItem(R.id.nav_create_event).setChecked(false);
         mNavigation.getMenu().findItem(R.id.nav_feedback).setChecked(false);
@@ -498,6 +670,9 @@ public class MainActivity extends AppCompatActivity {
         mNavigation.getMenu().findItem(R.id.nav_profile).setChecked(false);
         mNavigation.getMenu().findItem(R.id.nav_Rate_Us).setChecked(false);
         mNavigation.getMenu().findItem(R.id.nav_wish_list).setChecked(false);
+        mNavigation.getMenu().findItem(R.id.nav_share).setChecked(false);
+
+
 
 
         mAuth.addAuthStateListener(mAuthListener);
@@ -508,7 +683,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RC_SIGN_IN) {
-            Log.i(TAG, "onActivityResult: " + resultCode);
 
             IdpResponse response = IdpResponse.fromResultIntent(data);
             if (resultCode == RESULT_OK) {
@@ -519,7 +693,6 @@ public class MainActivity extends AppCompatActivity {
                     finish();
                 }
             } else {
-                Log.i(TAG, "onActivityResult: " + resultCode);
                 // Sign in failed
                 if (response == null) {
                     // User pressed back button
@@ -529,16 +702,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 if (response.getErrorCode() == ErrorCodes.NO_NETWORK) {
-                    /*AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
-                    dialog.setMessage("Check your internet connection");
-                    dialog.setTitle("No Internet Detected");
-                    dialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            return;
-                        }
-                    });
-                    dialog.show();*/
+
                 }
 
                 if (response.getErrorCode() == ErrorCodes.UNKNOWN_ERROR) {
@@ -661,16 +825,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public boolean isInternetAvailable() {
-        try {
-            InetAddress ipAddr = InetAddress.getByName("google.com"); //You can replace it with your name
-            return !ipAddr.equals("");
 
-        } catch (Exception e) {
-            return false;
-        }
-
-    }
 
     private void logout() {
 
@@ -684,4 +839,38 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
 
     }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case 1:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.i("poiuy", "onRequestPermissionsResult: ");
+
+                    ContentResolver cr = getContentResolver();
+                    ContentValues values = new ContentValues();
+                    values.put(CalendarContract.Events.DTSTART, temp.getStart_date_time());
+                    values.put(CalendarContract.Events.DTEND, temp.getEnd_date_time());
+                    values.put(CalendarContract.Events.TITLE, temp.getName());
+                    values.put(CalendarContract.Events.DESCRIPTION, temp.getDescription());
+                    values.put(CalendarContract.Events.CALENDAR_ID, callId++);
+                    edit.putInt("callId", callId);
+
+                    values.put(CalendarContract.Events.EVENT_TIMEZONE, "America/Los_Angeles");
+                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
+
+                        return;
+                    }
+                    Uri uri = cr.insert(CalendarContract.Events.CONTENT_URI, values);
+                    long eventID = Long.parseLong(uri.getLastPathSegment());
+
+                    edit.putLong(temp.getName(), eventID);
+                    edit.commit();
+                }
+
+        }
+    }
+
+
 }

@@ -247,7 +247,7 @@ public class PostEventActivity extends AppCompatActivity {
     private void startPosting() {
         mProgress.setMessage("Posting your Event ");
 
-        final String mEventName = mPostEventName.getText().toString().trim();
+        final String mEventName = mPostEventName.getText().toString().trim().toLowerCase();
         final String mEventVenue = mPostEventVenue.getText().toString().trim();
         final String mEventCategory = mPostEventCategory.getSelectedItem().toString();
         final String mEventDescription = mPostEventDescription.getText().toString().trim();
@@ -326,7 +326,7 @@ public class PostEventActivity extends AppCompatActivity {
         if (requestCode == GALLERY_REQUEST && resultCode == RESULT_OK) {
             eventImageUri = data.getData();
 
-            CropImage.activity(eventImageUri).setGuidelines(CropImageView.Guidelines.ON).setAspectRatio(2, 1).start(this);
+            CropImage.activity(eventImageUri).setGuidelines(CropImageView.Guidelines.ON).start(this);
         }
         if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
             CropImage.ActivityResult result = CropImage.getActivityResult(data);
@@ -349,5 +349,11 @@ public class PostEventActivity extends AppCompatActivity {
             randomStringBuilder.append(tempChar);
         }
         return randomStringBuilder.toString();
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(R.anim.no_change,R.anim.slide_down);
     }
 }

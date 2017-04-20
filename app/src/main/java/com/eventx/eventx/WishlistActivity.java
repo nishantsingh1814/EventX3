@@ -1,10 +1,16 @@
 package com.eventx.eventx;
 
 import android.app.ActivityOptions;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.net.Uri;
+import android.provider.CalendarContract;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -57,12 +63,14 @@ public class WishlistActivity extends AppCompatActivity {
     private boolean mProcessLike = false;
     private DatabaseReference mDatabaseLike;
     LinearLayoutManager layoutManager;
+    private SharedPreferences sp;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wishlist);
+        sp=getSharedPreferences("EventX",MODE_PRIVATE);
 
         toolbar=(Toolbar)findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -99,7 +107,7 @@ public class WishlistActivity extends AppCompatActivity {
         ) {
 
             @Override
-            protected void populateViewHolder(EventViewHolder viewHolder, Event model, int position) {
+            protected void populateViewHolder(EventViewHolder viewHolder,final Event model, int position) {
 
                 final String post_key = getRef(position).getKey();
                 viewHolder.setName(model.getName());
@@ -114,7 +122,29 @@ public class WishlistActivity extends AppCompatActivity {
                     public void onClick(View v) {
                         Intent singleEventIntent = new Intent(WishlistActivity.this, EventSingleView.class);
                         singleEventIntent.putExtra("event_id", post_key);
-                        startActivity(singleEventIntent, ActivityOptions.makeSceneTransitionAnimation(WishlistActivity.this).toBundle());
+                        startActivity(singleEventIntent);
+                        overridePendingTransition(R.anim.slide_right,R.anim.no_change);
+
+                    }
+                });
+                viewHolder.mShareBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        try {
+                            Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+                            sharingIntent.setType("text/plain");
+
+                            Uri data = Uri.parse("https://jq49b.app.goo.gl/eNh4");
+                            Uri.Builder link = new Uri.Builder();
+                            link.scheme("https").authority("eventx-77033.firebaseapp.com").appendPath("Event.html").appendQueryParameter("eventid", post_key);
+                            sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "EventX");
+                            sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, "Hey i just found an event here" + "\n\n" + link.build().toString() + "\n\nDownload our android app here \n" + data);
+                            startActivity(Intent.createChooser(sharingIntent,"Select App"));
+                            overridePendingTransition(R.anim.slide_right, R.anim.no_change);
+
+                        } catch (Exception e) {
+                            //e.toString();
+                        }
                     }
                 });
 
@@ -138,7 +168,24 @@ public class WishlistActivity extends AppCompatActivity {
                                         mDatabaseLike.child(post_key).child(mAuth.getCurrentUser().getUid()).removeValue();
                                         mLikeUserDb.child(post_key).removeValue();
                                         Snackbar.make(v, "Removed from your WishList", Snackbar.LENGTH_LONG).show();
+                                        if (ActivityCompat.checkSelfPermission(WishlistActivity.this, android.Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
+                                            // TODO: Consider calling
 
+                                            //    ActivityCompat#requestPermissions
+                                            // here to request the missing permissions, and then overriding
+                                            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                            //                                          int[] grantResults)
+                                            // to handle the case where the user grants the permission. See the documentation
+                                            // for ActivityCompat#requestPermissions for more details.
+                                            return;
+                                        }
+                                        Uri deleteUri = null;
+                                        if(sp.getLong(model.getName(), -1)==-1){
+                                            mProcessLike = false;
+                                            return;
+                                        }
+                                        deleteUri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI,sp.getLong(model.getName(),-1));
+                                        int rows = getContentResolver().delete(deleteUri, null, null);
                                         mProcessLike = false;
                                     } else {
                                         mLikeUserDb.child(post_key).setValue(post_key);
@@ -163,6 +210,24 @@ public class WishlistActivity extends AppCompatActivity {
             }
         };
         likeEvents.setAdapter(firebaseRecyclerAdapter);
+
+        mDatabaseUserLike.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(!dataSnapshot.hasChildren()){
+                    TextView noEvents=(TextView)findViewById(R.id.no_item);
+                    noEvents.setVisibility(View.VISIBLE);
+                }else{
+                    TextView noEvents=(TextView)findViewById(R.id.no_item);
+                    noEvents.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     public static class EventViewHolder extends RecyclerView.ViewHolder {
@@ -171,11 +236,13 @@ public class WishlistActivity extends AppCompatActivity {
         DatabaseReference mDatabaseLike;
         FirebaseAuth mAuth;
         ImageButton mLikeBtn;
+        ImageButton mShareBtn;
 
         public EventViewHolder(View itemView) {
             super(itemView);
             mView = itemView;
             mLikeBtn = (ImageButton) mView.findViewById(R.id.like_btn);
+            mShareBtn = (ImageButton) mView.findViewById(R.id.share_btn);
 
             mAuth = FirebaseAuth.getInstance();
 
@@ -281,11 +348,12 @@ public class WishlistActivity extends AppCompatActivity {
         if(item.getItemId()==android.R.id.home){
             onBackPressed();
         }
-        return super.onOptionsItemSelected(item);
+        return true;
     }
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+        overridePendingTransition(R.anim.no_change,R.anim.slide_down);
     }
 }
