@@ -2,6 +2,8 @@ package com.eventx.eventx;
 
 import android.*;
 import android.Manifest;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -16,6 +18,7 @@ import android.net.Uri;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
 
+import android.os.SystemClock;
 import android.provider.CalendarContract;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -136,6 +139,9 @@ public class MainActivity extends AppCompatActivity {
 
     Event temp;
     int callId;
+//    private AdView mAdView;
+
+    boolean firstOpen;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,9 +149,19 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
+//        mAdView = (AdView) findViewById(R.id.adView);
+//        AdRequest adRequest = new AdRequest.Builder().build();
+//        mAdView.loadAd(adRequest);
+        
         sp = getSharedPreferences("EventX", MODE_PRIVATE);
         edit = sp.edit();
+        firstOpen=sp.getBoolean("firstOpen",false);
+        if(!firstOpen){
+            setChronJob();
+            edit.putBoolean("firstOpen",true);
+            edit.apply();
+        }
+
         callId = sp.getInt("callId", 1);
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mAuth = FirebaseAuth.getInstance();
@@ -381,9 +397,7 @@ public class MainActivity extends AppCompatActivity {
         mEventList.setHasFixedSize(true);
 
 
-        firstVisibleInListview = layoutManager.findFirstVisibleItemPosition();
         mEventList.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            private int mLastFirstVisibleItem;
 
 
             @Override
@@ -451,6 +465,12 @@ public class MainActivity extends AppCompatActivity {
         setUpViews();
     }
 
+    public void setChronJob(){
+        AlarmManager am=(AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
+        Intent i = new Intent(this, DeletePastEventsReciever.class);
+        PendingIntent operation=PendingIntent.getBroadcast(MainActivity.this,1,i,PendingIntent.FLAG_UPDATE_CURRENT);
+        am.setRepeating(AlarmManager.RTC, System.currentTimeMillis()+10*60*1000,24*60*60*1000,operation);
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
@@ -858,7 +878,7 @@ public class MainActivity extends AppCompatActivity {
                     edit.putInt("callId", callId);
 
                     values.put(CalendarContract.Events.EVENT_TIMEZONE, "America/Los_Angeles");
-                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
+                    if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
 
                         return;
                     }
@@ -868,7 +888,6 @@ public class MainActivity extends AppCompatActivity {
                     edit.putLong(temp.getName(), eventID);
                     edit.commit();
                 }
-
         }
     }
 

@@ -23,8 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
+
 import com.google.android.gms.appinvite.AppInvite;
 import com.google.android.gms.appinvite.AppInviteInvitation;
 import com.google.android.gms.appinvite.AppInviteInvitationResult;
@@ -72,7 +71,7 @@ public class EventSingleView extends AppCompatActivity implements GoogleApiClien
     private String event_venue;
     private String event_image;
 
-    private AdView mAdView;
+//    private AdView mAdView;
 
 
     @Override
@@ -83,9 +82,9 @@ public class EventSingleView extends AppCompatActivity implements GoogleApiClien
 
         setContentView(R.layout.activity_event_single_view);
 
-        mAdView = (AdView) findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
+//        mAdView = (AdView) findViewById(R.id.adView);
+//        AdRequest adRequest = new AdRequest.Builder().build();
+//        mAdView.loadAd(adRequest);
 
         if (getIntent().getExtras().getString("event_id") != null) {
             mPostKey = getIntent().getExtras().getString("event_id");
@@ -138,40 +137,45 @@ public class EventSingleView extends AppCompatActivity implements GoogleApiClien
         mDatabaseEvents.child(mPostKey).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                String event_name = (String) dataSnapshot.child("name").getValue();
-                setTitle("Event: " + event_name);
+                if(dataSnapshot.child("start_date_time").getValue()!=null) {
+                    String event_name = (String) dataSnapshot.child("name").getValue();
+                    setTitle("Event: " + event_name);
 
-                event_state = (String) dataSnapshot.child("state").getValue();
-                event_venue = (String) dataSnapshot.child("venue").getValue();
-                String event_description = (String) dataSnapshot.child("description").getValue();
-                event_image = (String) dataSnapshot.child("image").getValue();
-                long event_start_date = (long) dataSnapshot.child("start_date_time").getValue();
-                long event_end_date = (long) dataSnapshot.child("end_date_time").getValue();
-                String event_category = (String) dataSnapshot.child("category").getValue();
+                    event_state = (String) dataSnapshot.child("state").getValue();
+                    event_venue = (String) dataSnapshot.child("venue").getValue();
+                    String event_description = (String) dataSnapshot.child("description").getValue();
+                    event_image = (String) dataSnapshot.child("image").getValue();
 
-                String post_uid = (String) dataSnapshot.child("uid").getValue();
+                    long event_start_date = (long) dataSnapshot.child("start_date_time").getValue();
+                    long event_end_date = (long) dataSnapshot.child("end_date_time").getValue();
 
-                Date startDate = new Date(event_start_date);
-                SimpleDateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy");
-                String startdateString = formatter.format(startDate);
-                formatter = new SimpleDateFormat("hh:mm:a");
-                String starttimeString = formatter.format(startDate);
+                    String event_category = (String) dataSnapshot.child("category").getValue();
 
-                Date endDate = new Date(event_end_date);
-                SimpleDateFormat endFormatter = new SimpleDateFormat("E, dd MMM yyyy");
-                String enddateString = endFormatter.format(endDate);
-                endFormatter = new SimpleDateFormat("hh:mm a");
-                String endtimeString = endFormatter.format(endDate);
+                    String post_uid = (String) dataSnapshot.child("uid").getValue();
 
-                eventName.setText(event_name);
-                eventDescription.setText(event_description);
-                eventVenue.setText(event_venue + "," + event_state);
-                eventCategory.setText(event_category);
-                eventDate.setText(startdateString + " at " + starttimeString + "-\n\n" + enddateString + " at " + endtimeString);
-                Picasso.with(EventSingleView.this).load(event_image).into(eventImage);
+                    Date startDate = new Date(event_start_date);
+                    SimpleDateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy");
+                    String startdateString = formatter.format(startDate);
+                    formatter = new SimpleDateFormat("hh:mm:a");
+                    String starttimeString = formatter.format(startDate);
 
-                if (mAuth.getCurrentUser().getUid().equals(post_uid)) {
-                    mRemoveBtn.setVisibility(View.VISIBLE);
+                    Date endDate = new Date(event_end_date);
+                    SimpleDateFormat endFormatter = new SimpleDateFormat("E, dd MMM yyyy");
+                    String enddateString = endFormatter.format(endDate);
+                    endFormatter = new SimpleDateFormat("hh:mm a");
+                    String endtimeString = endFormatter.format(endDate);
+
+                    eventName.setText(event_name);
+                    eventDescription.setText(event_description);
+                    eventVenue.setText(event_venue + "," + event_state);
+                    eventCategory.setText(event_category);
+                    eventDate.setText(startdateString + " at " + starttimeString + "-\n\n" + enddateString + " at " + endtimeString);
+                    Picasso.with(EventSingleView.this).load(event_image).into(eventImage);
+
+
+                    if (mAuth.getCurrentUser().getUid().equals(post_uid)) {
+                        mRemoveBtn.setVisibility(View.VISIBLE);
+                    }
                 }
             }
 
@@ -206,7 +210,6 @@ public class EventSingleView extends AppCompatActivity implements GoogleApiClien
                     public void onClick(DialogInterface dialog, int which) {
                         mDatabaseEvents.child(mPostKey).removeValue();
                         Intent mainIntent = new Intent(EventSingleView.this, MainActivity.class);
-
                         startActivity(mainIntent);
                         finish();
                     }

@@ -247,7 +247,8 @@ public class PostEventActivity extends AppCompatActivity {
     private void startPosting() {
         mProgress.setMessage("Posting your Event ");
 
-        final String mEventName = mPostEventName.getText().toString().trim().toLowerCase();
+        final String mEventName = mPostEventName.getText().toString().trim();
+        final String mEventSearchName=mEventName.toLowerCase();
         final String mEventVenue = mPostEventVenue.getText().toString().trim();
         final String mEventCategory = mPostEventCategory.getSelectedItem().toString();
         final String mEventDescription = mPostEventDescription.getText().toString().trim();
@@ -267,6 +268,7 @@ public class PostEventActivity extends AppCompatActivity {
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                     @SuppressWarnings("VisibleForTests") Uri downloadUrl = taskSnapshot.getDownloadUrl();
                     DatabaseReference newPost = mDatabase.push();
+                    newPost.child("s_name").setValue(mEventSearchName);
                     newPost.child("name").setValue(mEventName);
                     newPost.child("venue").setValue(mEventVenue);
                     newPost.child("category").setValue(mEventCategory);

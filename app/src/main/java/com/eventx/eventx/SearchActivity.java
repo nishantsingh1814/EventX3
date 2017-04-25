@@ -105,7 +105,7 @@ public class SearchActivity extends AppCompatActivity {
 
         mEventSearchList = (RecyclerView) findViewById(R.id.event_search_list);
         mDatabaseEvents = FirebaseDatabase.getInstance().getReference().child("Event");
-        query = mDatabaseEvents.orderByChild("name").startAt(queryText).endAt(queryText + "\uf8ff");
+        query = mDatabaseEvents.orderByChild("s_name").startAt(queryText).endAt(queryText + "\uf8ff");
 
         layoutManager = new LinearLayoutManager(SearchActivity.this);
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);

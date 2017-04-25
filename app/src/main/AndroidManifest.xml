@@ -71,7 +71,12 @@
         </activity>
         <activity android:name=".WishlistActivity" />
         <activity android:name=".ImageAcitivity" />
-        <activity android:name=".SearchActivity"></activity>
+        <activity android:name=".SearchActivity" />
+
+        <receiver
+            android:name=".DeletePastEventsReciever"
+            android:enabled="true"
+            android:exported="true"></receiver>
     </application>
 
 </manifest>
