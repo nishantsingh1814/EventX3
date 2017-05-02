@@ -20,7 +20,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <include layout="@layout/app_bar" />
 
             <android.support.design.widget.CollapsingToolbarLayout
                 android:layout_width="match_parent"
@@ -30,26 +29,44 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="horizontal">
+                    app:layout_collapseMode="pin"
+                    android:orientation="vertical">
 
-                    <Spinner
-                        android:id="@+id/post_event_state"
-                        android:layout_width="0dp"
+                    <android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+                        xmlns:app="http://schemas.android.com/apk/res-auto"
+                        android:id="@+id/app_bar"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:fontFamily="sans-serif"
-                        android:popupBackground="#FFFFFF"
-                        android:spinnerMode="dropdown" />
+                        android:background="@color/colorPrimary"
+                        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+                        android:title="EventX"
+                        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
-                    <Spinner
-                        android:id="@+id/post_event_category"
-                        android:layout_width="0dp"
-                        android:layout_height="48dp"
-                        android:layout_weight="1"
-                        android:fontFamily="sans-serif"
-                        android:popupBackground="#FFFFFF"
-                        android:spinnerMode="dropdown" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        ads:layout_collapseMode="parallax">
 
+                        <Spinner
+                            android:id="@+id/post_event_state"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:fontFamily="sans-serif"
+                            android:popupBackground="#FFFFFF"
+                            android:spinnerMode="dropdown" />
+
+                        <Spinner
+                            android:id="@+id/post_event_category"
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_weight="1"
+                            android:fontFamily="sans-serif"
+                            android:popupBackground="#FFFFFF"
+                            android:spinnerMode="dropdown" />
+
+                    </LinearLayout>
                 </LinearLayout>
 
             </android.support.design.widget.CollapsingToolbarLayout>
@@ -75,7 +92,7 @@
                 android:id="@+id/swipeRefreshLayout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-
+                android:layout_marginBottom="50dp"
                 app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
                 <android.support.v7.widget.RecyclerView
@@ -84,15 +101,15 @@
                     android:layout_height="match_parent" />
             </android.support.v4.widget.SwipeRefreshLayout>
 
-            <!--<com.google.android.gms.ads.AdView-->
-                <!--android:id="@+id/adView"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_alignParentBottom="true"-->
-                <!--ads:adSize="BANNER"-->
-                <!--ads:adUnitId="@string/banner_ad_unit_id">-->
+            <com.google.android.gms.ads.AdView
+                android:id="@+id/adView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                ads:adSize="BANNER"
+                ads:adUnitId="@string/banner_ad_unit_id">
 
-            <!--</com.google.android.gms.ads.AdView>-->
+            </com.google.android.gms.ads.AdView>
         </RelativeLayout>
 
         <android.support.design.widget.FloatingActionButton

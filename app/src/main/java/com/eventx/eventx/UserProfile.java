@@ -62,6 +62,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import at.markushi.ui.CircleButton;
+
 import static android.R.id.edit;
 
 
@@ -150,7 +152,6 @@ public class UserProfile extends AppCompatActivity {
 
 
             if(user.getProviders().toString().equals("[google.com]")){
-                Log.i("projkl", "onCreate: ");
                 Picasso.with(UserProfile.this).load(user.getPhotoUrl().toString().replace("/s96-c/","/s300-c/")).into(mProfilePhoto);
             }
             else{
@@ -232,7 +233,7 @@ public class UserProfile extends AppCompatActivity {
                 viewHolder.mView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Intent singleEventIntent = new Intent(UserProfile.this, EventSingleView.class);
+                        Intent singleEventIntent = new Intent(UserProfile.this, EventView.class);
                         singleEventIntent.putExtra("event_id", post_key);
                         startActivity(singleEventIntent);
                         overridePendingTransition(R.anim.slide_right,R.anim.no_change);
@@ -373,8 +374,8 @@ public class UserProfile extends AppCompatActivity {
 
     public static class UserEventViewHolder extends RecyclerView.ViewHolder {
         View mView;
-        ImageButton mLikeButton;
-        ImageButton mShareBtn;
+        CircleButton mLikeButton;
+        CircleButton mShareBtn;
 
         DatabaseReference mDatabaseLike;
         FirebaseAuth mAuth;
@@ -382,8 +383,8 @@ public class UserProfile extends AppCompatActivity {
         public UserEventViewHolder(View itemView) {
             super(itemView);
             mView = itemView;
-            mShareBtn = (ImageButton) mView.findViewById(R.id.share_btn);
-            mLikeButton = (ImageButton) mView.findViewById(R.id.like_btn);
+            mShareBtn = (CircleButton) mView.findViewById(R.id.share_btn);
+            mLikeButton = (CircleButton) mView.findViewById(R.id.like_btn);
             mAuth = FirebaseAuth.getInstance();
         }
 
@@ -395,9 +396,11 @@ public class UserProfile extends AppCompatActivity {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     if (dataSnapshot.hasChild(mAuth.getCurrentUser().getUid())) {
-                        mLikeButton.setColorFilter(Color.parseColor("#607D8B"));
+                        mLikeButton.setColor(Color.WHITE);
+                        mLikeButton.setImageResource(R.drawable.thumb);
                     } else {
-                        mLikeButton.setColorFilter(Color.parseColor("#e6e6e6"));
+                        mLikeButton.setColor(Color.parseColor("#F1643B"));
+                        mLikeButton.setImageResource(R.drawable.ic_thumbs_up_hand_symbol);
                     }
                 }
 

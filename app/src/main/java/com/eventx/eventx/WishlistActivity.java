@@ -42,6 +42,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 
+import at.markushi.ui.CircleButton;
+
 public class WishlistActivity extends AppCompatActivity {
 
     private DatabaseReference mDatabase;
@@ -120,7 +122,7 @@ public class WishlistActivity extends AppCompatActivity {
                 viewHolder.mView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Intent singleEventIntent = new Intent(WishlistActivity.this, EventSingleView.class);
+                        Intent singleEventIntent = new Intent(WishlistActivity.this, EventView.class);
                         singleEventIntent.putExtra("event_id", post_key);
                         startActivity(singleEventIntent);
                         overridePendingTransition(R.anim.slide_right,R.anim.no_change);
@@ -157,7 +159,7 @@ public class WishlistActivity extends AppCompatActivity {
                         mDatabaseLikeCurrentPost = mDatabaseLike.child(post_key);
                         mDatabaseLike.keepSynced(true);
                         mDatabaseLikeCurrentPost.keepSynced(true);
-                        if(mAuth.getCurrentUser().getUid()!=null){
+                        if(mAuth.getCurrentUser()!=null){
                             mLikeUserDb=mDatabaseUser.child(mAuth.getCurrentUser().getUid()).child("Like");
                         }
                         mDatabaseLikeCurrentPost.addValueEventListener(new ValueEventListener() {
@@ -167,6 +169,8 @@ public class WishlistActivity extends AppCompatActivity {
                                     if (dataSnapshot.hasChild(mAuth.getCurrentUser().getUid())) {
                                         mDatabaseLike.child(post_key).child(mAuth.getCurrentUser().getUid()).removeValue();
                                         mLikeUserDb.child(post_key).removeValue();
+                                        mProcessLike = false;
+
                                         Snackbar.make(v, "Removed from your WishList", Snackbar.LENGTH_LONG).show();
                                         if (ActivityCompat.checkSelfPermission(WishlistActivity.this, android.Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
                                             // TODO: Consider calling
@@ -187,12 +191,6 @@ public class WishlistActivity extends AppCompatActivity {
                                         deleteUri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI,sp.getLong(model.getName(),-1));
                                         int rows = getContentResolver().delete(deleteUri, null, null);
                                         mProcessLike = false;
-                                    } else {
-                                        mLikeUserDb.child(post_key).setValue(post_key);
-                                        mDatabaseLike.child(post_key).child(mAuth.getCurrentUser().getUid()).setValue(mAuth.getCurrentUser().getUid());
-                                        mProcessLike = false;
-                                        Snackbar.make(v, "Added to your WishList", Snackbar.LENGTH_LONG).show();
-
                                     }
                                 }
                             }
@@ -235,14 +233,14 @@ public class WishlistActivity extends AppCompatActivity {
         View mView;
         DatabaseReference mDatabaseLike;
         FirebaseAuth mAuth;
-        ImageButton mLikeBtn;
-        ImageButton mShareBtn;
+        CircleButton mLikeBtn;
+        CircleButton mShareBtn;
 
         public EventViewHolder(View itemView) {
             super(itemView);
             mView = itemView;
-            mLikeBtn = (ImageButton) mView.findViewById(R.id.like_btn);
-            mShareBtn = (ImageButton) mView.findViewById(R.id.share_btn);
+            mLikeBtn = (CircleButton) mView.findViewById(R.id.like_btn);
+            mShareBtn = (CircleButton) mView.findViewById(R.id.share_btn);
 
             mAuth = FirebaseAuth.getInstance();
 
@@ -263,10 +261,11 @@ public class WishlistActivity extends AppCompatActivity {
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     if (mAuth.getCurrentUser().getUid() != null) {
                         if (dataSnapshot.hasChild(mAuth.getCurrentUser().getUid())) {
-
-                            mLikeBtn.setColorFilter(Color.parseColor("#607D8B"));
+                            mLikeBtn.setColor(Color.WHITE);
+                            mLikeBtn.setImageResource(R.drawable.thumb);
                         } else {
-                            mLikeBtn.setColorFilter(Color.parseColor("#e6e6e6"));
+                            mLikeBtn.setColor(Color.parseColor("#F1643B"));
+                            mLikeBtn.setImageResource(R.drawable.ic_thumbs_up_hand_symbol);
                         }
                     }
                 }

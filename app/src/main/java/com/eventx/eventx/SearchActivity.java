@@ -44,6 +44,8 @@ import com.squareup.picasso.Picasso;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import at.markushi.ui.CircleButton;
+
 import static android.R.id.edit;
 
 public class SearchActivity extends AppCompatActivity {
@@ -155,7 +157,7 @@ public class SearchActivity extends AppCompatActivity {
                 viewHolder.mView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Intent singleEventIntent = new Intent(SearchActivity.this, EventSingleView.class);
+                        Intent singleEventIntent = new Intent(SearchActivity.this, EventView.class);
                         singleEventIntent.putExtra("event_id", post_key);
                         startActivity(singleEventIntent);
                         overridePendingTransition(R.anim.slide_right, R.anim.no_change);
@@ -299,8 +301,8 @@ public class SearchActivity extends AppCompatActivity {
 
         View mView;
 
-        ImageButton mLikeBtn;
-        ImageButton mShareBtn;
+        CircleButton mLikeBtn;
+        CircleButton mShareBtn;
 
         DatabaseReference mDatabaseLike;
         FirebaseAuth mAuth;
@@ -308,8 +310,8 @@ public class SearchActivity extends AppCompatActivity {
         public EventViewHolder(View itemView) {
             super(itemView);
             mView = itemView;
-            mLikeBtn = (ImageButton) mView.findViewById(R.id.like_btn);
-            mShareBtn = (ImageButton) mView.findViewById(R.id.share_btn);
+            mLikeBtn = (CircleButton) mView.findViewById(R.id.like_btn);
+            mShareBtn = (CircleButton) mView.findViewById(R.id.share_btn);
             mAuth = FirebaseAuth.getInstance();
 
         }
@@ -322,10 +324,11 @@ public class SearchActivity extends AppCompatActivity {
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     if (mAuth.getCurrentUser() != null) {
                         if (dataSnapshot.hasChild(mAuth.getCurrentUser().getUid())) {
-
-                            mLikeBtn.setColorFilter(Color.parseColor("#607D8B"));
+                            mLikeBtn.setColor(Color.WHITE);
+                            mLikeBtn.setImageResource(R.drawable.thumb);
                         } else {
-                            mLikeBtn.setColorFilter(Color.parseColor("#e6e6e6"));
+                            mLikeBtn.setColor(Color.parseColor("#F1643B"));
+                            mLikeBtn.setImageResource(R.drawable.ic_thumbs_up_hand_symbol);
                         }
                     }
                 }
@@ -411,7 +414,6 @@ public class SearchActivity extends AppCompatActivity {
         switch (requestCode) {
             case 1:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Log.i("poiuy", "onRequestPermissionsResult: ");
 
                     ContentResolver cr = getContentResolver();
                     ContentValues values = new ContentValues();

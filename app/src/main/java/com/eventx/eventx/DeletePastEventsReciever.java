@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.provider.Settings;
+import android.util.Log;
 
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -13,31 +14,27 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import static com.twitter.sdk.android.core.TwitterCore.TAG;
+
 public class DeletePastEventsReciever extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        DatabaseReference mDatabaseEvents = FirebaseDatabase.getInstance().getReference().child("Event");
+        final DatabaseReference mDatabaseEvents = FirebaseDatabase.getInstance().getReference().child("Event");
 
-        Query query = mDatabaseEvents.orderByChild("end_date_time").endAt(System.currentTimeMillis()).limitToLast(1);
-        query.addChildEventListener(new ChildEventListener() {
+        mDatabaseEvents.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                dataSnapshot.getRef().removeValue();
-            }
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for(DataSnapshot itemSnapshot:dataSnapshot.getChildren()){
+                    long time = System.currentTimeMillis();  //get time in millis
+                    long end = (long) itemSnapshot.child("end_date_time").getValue();
+                    //get the end time from firebase database
 
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                    if (end < time){
+                        mDatabaseEvents.child(itemSnapshot.getRef().getKey()).removeValue();  //remove the entry
+                    }
+                }
 
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
 
             }
 

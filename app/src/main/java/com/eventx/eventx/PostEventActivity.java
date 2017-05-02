@@ -55,6 +55,9 @@ public class PostEventActivity extends AppCompatActivity {
     private Button mPostEventEndDateBtn;
     private Button mPostEventEndTimeBtn;
     private Spinner mPostEventState;
+    private EditText mEventPhone;
+    private EditText mEventEmail;
+    private EditText mHostName;
 
     private Button mPostEventBtn;
 
@@ -101,6 +104,9 @@ public class PostEventActivity extends AppCompatActivity {
         mPostEventEndTimeBtn = (Button) findViewById(R.id.post_event_end_time_btn);
         mPostEventState=(Spinner)findViewById(R.id.post_event_state);
         mPostEventBtn = (Button) findViewById(R.id.post_event_btn);
+        mEventEmail=(EditText)findViewById(R.id.post_email) ;
+        mEventPhone=(EditText)findViewById(R.id.post_phone);
+        mHostName=(EditText)findViewById(R.id.host_name);
         mProgress = new ProgressDialog(this);
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
@@ -253,6 +259,10 @@ public class PostEventActivity extends AppCompatActivity {
         final String mEventCategory = mPostEventCategory.getSelectedItem().toString();
         final String mEventDescription = mPostEventDescription.getText().toString().trim();
         final String mEventState=mPostEventState.getSelectedItem().toString();
+        final String mEmail=mEventEmail.getText().toString().trim();
+        final String mPhone=mEventPhone.getText().toString().trim();
+        final String hostName=mHostName.getText().toString().trim();
+
         String mEventStartDate = mPostEventStartDateBtn.getText().toString();
         String mEventStartTime = mPostEventStartTimeBtn.getText().toString();
         String mEventEndDate = mPostEventEndDateBtn.getText().toString();
@@ -260,7 +270,8 @@ public class PostEventActivity extends AppCompatActivity {
         final long epochStart = startCalendar.getTimeInMillis();
         final long epochEnd = endCalendar.getTimeInMillis();
 
-        if (!TextUtils.isEmpty(mEventName) && !TextUtils.isEmpty(mEventVenue) && !(mEventDescription.length() < 25) && !mEventStartDate.equals("Event Start Date") && !mEventStartTime.equals("Event Start Time") && !mEventEndDate.equals("Event End Date") && !mEventEndTime.equals("Event End Time") && !(epochEnd < epochStart)&&!(epochEnd<Calendar.getInstance().getTimeInMillis()) && eventImageUri != null) {
+
+        if (!TextUtils.isEmpty(hostName)&&!TextUtils.isEmpty(mEmail)&&(mPhone.length()==10||mPhone.length()==0)&&!TextUtils.isEmpty(mEventName) && !TextUtils.isEmpty(mEventVenue) && !(mEventDescription.length() < 25) && !mEventStartDate.equals("Event Start Date") && !mEventStartTime.equals("Event Start Time") && !mEventEndDate.equals("Event End Date") && !mEventEndTime.equals("Event End Time") && !(epochEnd < epochStart)&&!(epochEnd<Calendar.getInstance().getTimeInMillis()) && eventImageUri != null) {
             mProgress.show();
             StorageReference filePath = mStorage.child("Event_images").child(randomString());
             filePath.putFile(resultUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
@@ -268,6 +279,9 @@ public class PostEventActivity extends AppCompatActivity {
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                     @SuppressWarnings("VisibleForTests") Uri downloadUrl = taskSnapshot.getDownloadUrl();
                     DatabaseReference newPost = mDatabase.push();
+                    newPost.child("h_name").setValue(hostName);
+                    newPost.child("phone").setValue(mPhone);
+                    newPost.child("email").setValue(mEmail);
                     newPost.child("s_name").setValue(mEventSearchName);
                     newPost.child("name").setValue(mEventName);
                     newPost.child("venue").setValue(mEventVenue);
@@ -315,6 +329,12 @@ public class PostEventActivity extends AppCompatActivity {
                 Toast.makeText(PostEventActivity.this, "Select Event Image", Toast.LENGTH_SHORT).show();
             }else if((epochEnd<Calendar.getInstance().getTimeInMillis())){
                 Toast.makeText(PostEventActivity.this, "Please select future time", Toast.LENGTH_SHORT).show();
+            }else if(TextUtils.isEmpty(mEmail)){
+                Toast.makeText(PostEventActivity.this, "Enter Contact Email", Toast.LENGTH_SHORT).show();
+            }else if(mPhone.length()>0&&mPhone.length()<10){
+                Toast.makeText(PostEventActivity.this, "Enter 10 digit phone no.", Toast.LENGTH_SHORT).show();
+            }else if(TextUtils.isEmpty(hostName)){
+                Toast.makeText(PostEventActivity.this, "Enter your name", Toast.LENGTH_SHORT).show();
             }
         }
 

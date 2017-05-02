@@ -20,6 +20,7 @@ import com.facebook.appevents.AppEventsLogger;
 
 import android.os.SystemClock;
 import android.provider.CalendarContract;
+import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -58,6 +59,8 @@ import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -79,6 +82,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 
+import at.markushi.ui.CircleButton;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -139,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
 
     Event temp;
     int callId;
-//    private AdView mAdView;
+    private AdView mAdView;
 
     boolean firstOpen;
 
@@ -149,16 +153,16 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        mAdView = (AdView) findViewById(R.id.adView);
-//        AdRequest adRequest = new AdRequest.Builder().build();
-//        mAdView.loadAd(adRequest);
-        
+        mAdView = (AdView) findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
+
         sp = getSharedPreferences("EventX", MODE_PRIVATE);
         edit = sp.edit();
-        firstOpen=sp.getBoolean("firstOpen",false);
-        if(!firstOpen){
+        firstOpen = sp.getBoolean("firstOpen", false);
+        if (!firstOpen) {
             setChronJob();
-            edit.putBoolean("firstOpen",true);
+            edit.putBoolean("firstOpen", true);
             edit.apply();
         }
 
@@ -183,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
         toolbar = (Toolbar) findViewById(R.id.app_bar);
         setSupportActionBar(toolbar);
 
-        mRefreshLayout=(SwipeRefreshLayout)findViewById(R.id.swipeRefreshLayout);
+        mRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
         mCategorySpinner = (Spinner) findViewById(R.id.post_event_category);
         mLocationSpinner = (Spinner) findViewById(R.id.post_event_state);
 
@@ -330,14 +334,14 @@ public class MainActivity extends AppCompatActivity {
                     overridePendingTransition(R.anim.slide_up, R.anim.no_change);
 
                 }
-                if(item.getItemId()==R.id.nav_share){
+                if (item.getItemId() == R.id.nav_share) {
 
                     Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
                     sharingIntent.setType("text/plain");
 
                     sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Download EventX");
-                    sharingIntent.putExtra(Intent.EXTRA_TEXT, "Download EventX App "+"\n" + "https://jq49b.app.goo.gl/eNh4");
-                    startActivity(Intent.createChooser(sharingIntent,"Choose App"));
+                    sharingIntent.putExtra(Intent.EXTRA_TEXT, "Download EventX App " + "\n" + "https://jq49b.app.goo.gl/eNh4");
+                    startActivity(Intent.createChooser(sharingIntent, "Choose App"));
                     overridePendingTransition(R.anim.slide_right, R.anim.no_change);
 
 
@@ -391,8 +395,7 @@ public class MainActivity extends AppCompatActivity {
         mEventList = (RecyclerView) findViewById(R.id.event_list);
         layoutManager = new LinearLayoutManager(MainActivity.this);
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-//        layoutManager.setReverseLayout(true);
-//        layoutManager.setStackFromEnd(true);
+
         mEventList.setLayoutManager(layoutManager);
         mEventList.setHasFixedSize(true);
 
@@ -465,12 +468,13 @@ public class MainActivity extends AppCompatActivity {
         setUpViews();
     }
 
-    public void setChronJob(){
-        AlarmManager am=(AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
+    public void setChronJob() {
+        AlarmManager am = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
         Intent i = new Intent(this, DeletePastEventsReciever.class);
-        PendingIntent operation=PendingIntent.getBroadcast(MainActivity.this,1,i,PendingIntent.FLAG_UPDATE_CURRENT);
-        am.setRepeating(AlarmManager.RTC, System.currentTimeMillis()+10*60*1000,24*60*60*1000,operation);
+        PendingIntent operation = PendingIntent.getBroadcast(MainActivity.this, 1, i, PendingIntent.FLAG_UPDATE_CURRENT);
+        am.setRepeating(AlarmManager.RTC, System.currentTimeMillis() + 3 * 60 * 1000, 24 * 60 * 60 * 1000, operation);
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
@@ -483,10 +487,10 @@ public class MainActivity extends AppCompatActivity {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String queryText) {
-                Intent searchIntent=new Intent(MainActivity.this,SearchActivity.class);
-                searchIntent.putExtra("searchString",queryText);
+                Intent searchIntent = new Intent(MainActivity.this, SearchActivity.class);
+                searchIntent.putExtra("searchString", queryText);
                 startActivity(searchIntent);
-                overridePendingTransition(R.anim.slide_up,R.anim.no_change);
+                overridePendingTransition(R.anim.slide_up, R.anim.no_change);
 
 
                 return true;
@@ -499,7 +503,6 @@ public class MainActivity extends AppCompatActivity {
         });
         return super.onCreateOptionsMenu(menu);
     }
-
 
 
     @Override
@@ -528,6 +531,7 @@ public class MainActivity extends AppCompatActivity {
             protected void populateViewHolder(EventViewHolder viewHolder, final Event model, final int position) {
 
                 temp = model;
+
                 final String post_key = getRef(position).getKey();
                 viewHolder.setName(model.getName());
                 viewHolder.setLocation(model.getVenue() + "," + model.getState());
@@ -539,7 +543,7 @@ public class MainActivity extends AppCompatActivity {
                 viewHolder.mView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Intent singleEventIntent = new Intent(MainActivity.this, EventSingleView.class);
+                        Intent singleEventIntent = new Intent(MainActivity.this, EventView.class);
                         singleEventIntent.putExtra("event_id", post_key);
                         startActivity(singleEventIntent);
                         overridePendingTransition(R.anim.slide_right, R.anim.no_change);
@@ -558,7 +562,7 @@ public class MainActivity extends AppCompatActivity {
                             link.scheme("https").authority("eventx-77033.firebaseapp.com").appendPath("Event.html").appendQueryParameter("eventid", post_key);
                             sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "EventX");
                             sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, "Hey i just found an event here" + "\n\n" + link.build().toString() + "\n\nDownload our android app here \n" + data);
-                            startActivity(Intent.createChooser(sharingIntent,"Select App"));
+                            startActivity(Intent.createChooser(sharingIntent, "Select App"));
                             overridePendingTransition(R.anim.slide_right, R.anim.no_change);
 
 
@@ -610,7 +614,7 @@ public class MainActivity extends AppCompatActivity {
 
                                         if (ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
                                             String[] permissions = {Manifest.permission.WRITE_CALENDAR};
-                                            ActivityCompat.requestPermissions(MainActivity.this, permissions, 1);
+                                            ActivityCompat.requestPermissions(MainActivity.this,permissions, 1);
 
                                             return;
                                         }
@@ -651,11 +655,11 @@ public class MainActivity extends AppCompatActivity {
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if(!dataSnapshot.hasChildren()){
-                    TextView noEvents=(TextView)findViewById(R.id.no_item);
+                if (!dataSnapshot.hasChildren()) {
+                    TextView noEvents = (TextView) findViewById(R.id.no_item);
                     noEvents.setVisibility(View.VISIBLE);
-                }else{
-                    TextView noEvents=(TextView)findViewById(R.id.no_item);
+                } else {
+                    TextView noEvents = (TextView) findViewById(R.id.no_item);
                     noEvents.setVisibility(View.GONE);
                 }
             }
@@ -691,8 +695,6 @@ public class MainActivity extends AppCompatActivity {
         mNavigation.getMenu().findItem(R.id.nav_Rate_Us).setChecked(false);
         mNavigation.getMenu().findItem(R.id.nav_wish_list).setChecked(false);
         mNavigation.getMenu().findItem(R.id.nav_share).setChecked(false);
-
-
 
 
         mAuth.addAuthStateListener(mAuthListener);
@@ -735,11 +737,10 @@ public class MainActivity extends AppCompatActivity {
 
 
     public static class EventViewHolder extends RecyclerView.ViewHolder {
-
         View mView;
 
-        ImageButton mLikeBtn;
-        ImageButton mShareBtn;
+        CircleButton mLikeBtn;
+        CircleButton mShareBtn;
 
         DatabaseReference mDatabaseLike;
         FirebaseAuth mAuth;
@@ -747,8 +748,8 @@ public class MainActivity extends AppCompatActivity {
         public EventViewHolder(View itemView) {
             super(itemView);
             mView = itemView;
-            mLikeBtn = (ImageButton) mView.findViewById(R.id.like_btn);
-            mShareBtn = (ImageButton) mView.findViewById(R.id.share_btn);
+            mLikeBtn = (CircleButton) mView.findViewById(R.id.like_btn);
+            mShareBtn = (CircleButton) mView.findViewById(R.id.share_btn);
             mAuth = FirebaseAuth.getInstance();
 
         }
@@ -761,10 +762,11 @@ public class MainActivity extends AppCompatActivity {
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     if (mAuth.getCurrentUser() != null) {
                         if (dataSnapshot.hasChild(mAuth.getCurrentUser().getUid())) {
-
-                            mLikeBtn.setColorFilter(Color.parseColor("#607D8B"));
+                            mLikeBtn.setColor(Color.WHITE);
+                            mLikeBtn.setImageResource(R.drawable.thumb);
                         } else {
-                            mLikeBtn.setColorFilter(Color.parseColor("#e6e6e6"));
+                            mLikeBtn.setColor(Color.parseColor("#F1643B"));
+                            mLikeBtn.setImageResource(R.drawable.ic_thumbs_up_hand_symbol);
                         }
                     }
                 }
@@ -829,6 +831,8 @@ public class MainActivity extends AppCompatActivity {
 
         public void setImage(final Context context, final String image) {
             final ImageView post_image = (ImageView) mView.findViewById(R.id.post_image);
+
+
             //Picasso.with(context).load(image).into(post_image);
             Picasso.with(context).load(image).networkPolicy(NetworkPolicy.OFFLINE).into(post_image, new Callback() {
                 @Override
@@ -844,7 +848,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
-
 
 
     private void logout() {
@@ -866,7 +869,6 @@ public class MainActivity extends AppCompatActivity {
         switch (requestCode) {
             case 1:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Log.i("poiuy", "onRequestPermissionsResult: ");
 
                     ContentResolver cr = getContentResolver();
                     ContentValues values = new ContentValues();
