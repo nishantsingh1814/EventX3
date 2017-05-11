@@ -15,6 +15,10 @@ Discover the events in your city. Browse events by location and categories like 
 -join the discussion for each event by comments</br></h3>
 
 
+<h2>Play store link- </h2></br>
+https://play.google.com/store/apps/details?id=com.eventx.eventx
+
+
 
 <img src="https://github.com/nishantsingh1814/EventX3/blob/master/WhatsApp%20Image%202017-05-11%20at%2018.38.39%20(1).jpeg" height="450" width="240">
 <img src="https://github.com/nishantsingh1814/EventX3/blob/master/WhatsApp%20Image%202017-05-01%20at%2013.47.17%20(8).jpeg" height="450" width="240">
