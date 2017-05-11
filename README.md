@@ -6,3 +6,20 @@ We are here to connect you to the events you are interested in.
 
 Discover the events in your city. Browse events by location and categories like technology ,workshops,sports and many more.
 
+<img src="https://github.com/nishantsingh1814/EventX3/blob/master/WhatsApp%20Image%202017-05-01%20at%2013.47.17%20(8).jpeg" height="450" width="240">
+
+<img src="https://github.com/nishantsingh1814/EventX3/blob/master/WhatsApp%20Image%202017-05-01%20at%2013.47.17%20(7).jpeg" height="450" width="240">
+
+<img src="https://github.com/nishantsingh1814/EventX3/blob/master/WhatsApp%20Image%202017-05-01%20at%2013.47.18%20(3).jpeg" height="450" width="240">
+
+<img src="https://github.com/nishantsingh1814/EventX3/blob/master/WhatsApp%20Image%202017-05-01%20at%2013.47.17%20(6).jpeg" height="450" width="240">
+
+<img src="https://github.com/nishantsingh1814/EventX3/blob/master/WhatsApp%20Image%202017-05-01%20at%2013.47.17%20(5).jpeg" height="450" width="240">
+
+<img src="https://github.com/nishantsingh1814/EventX3/blob/master/WhatsApp%20Image%202017-05-01%20at%2013.47.18%20(4).jpeg" height="450" width="240">
+
+
+
+
+
+<img src="https://github.com/nishantsingh1814/EventX3/blob/master/WhatsApp%20Image%202017-05-01%20at%2013.47.17%20(9).jpeg" height="450" width="240">
