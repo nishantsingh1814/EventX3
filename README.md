@@ -9,14 +9,14 @@ Discover the events in your city. Browse events by location and categories like 
 
 # Features-
 
-<h3>-Explore different events</br>
+<h4>-Explore different events</br>
 -Like any event and it would be added to your wishlist</br>
 -Create your own Event</br>
--join the discussion for each event by comments</br></h3>
+-join the discussion for each event by comments</br></h4>
 
 
 <h2>Play store link- </h2></br>
-https://play.google.com/store/apps/details?id=com.eventx.eventx
+https://play.google.com/store/apps/details?id=com.eventx.eventx</br>
 
 
 
