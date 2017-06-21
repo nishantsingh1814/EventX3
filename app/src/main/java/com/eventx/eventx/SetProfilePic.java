@@ -71,6 +71,19 @@ public class SetProfilePic extends AppCompatActivity {
         user_id = mAuth.getCurrentUser().getUid();
 
 
+        mDatabase.child(user_id).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.exists()){
+                    startActivity(new Intent(SetProfilePic.this,MainActivity.class));
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
         if(mAuth.getCurrentUser().getProviders().toString().equals("[phone]")){
             mUserNameEt.setVisibility(View.VISIBLE);
         }

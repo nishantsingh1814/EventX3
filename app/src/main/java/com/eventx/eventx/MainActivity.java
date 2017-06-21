@@ -70,6 +70,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Callback;
@@ -182,6 +183,7 @@ public class MainActivity extends AppCompatActivity {
 
         mFirebaseStorage = FirebaseStorage.getInstance();
         mDatabaseUsers = FirebaseDatabase.getInstance().getReference().child("Users");
+
 
 
 
@@ -493,8 +495,9 @@ public class MainActivity extends AppCompatActivity {
 
         setNotificaionCount();
         setUpViews();
-
-
+        if(mAuth.getCurrentUser()!=null) {
+            FirebaseMessaging.getInstance().subscribeToTopic(mAuth.getCurrentUser().getUid());
+        }
     }
 
     private void setNotificaionCount() {
