@@ -15,6 +15,11 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.net.Uri;
 
+import com.eventx.eventx.Adapter.EventsAdapter;
+import com.eventx.eventx.Model.EventModel;
+import com.eventx.eventx.Model.Result;
+import com.eventx.eventx.Network.ApiClient;
+import com.eventx.eventx.Network.ApiInterface;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
 
@@ -83,6 +88,8 @@ import java.util.Arrays;
 import java.util.Date;
 
 import at.markushi.ui.CircleButton;
+import retrofit2.Call;
+import retrofit2.Response;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -108,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
     private DatabaseReference mDatabaseEvents;
     private FirebaseStorage mFirebaseStorage;
     private StorageReference mProfilePhotosStorageReference;
+    private DatabaseReference mNotificationRef;
 
     private DatabaseReference mLikeUserDb;
     DrawerLayout mDrawerLayout;
@@ -121,6 +129,7 @@ public class MainActivity extends AppCompatActivity {
     private DatabaseReference mDatabaseLikeCurrentPost;
 
 
+    private TextView mNotificationCount;
     private boolean mProcessLike = false;
 
 
@@ -128,6 +137,7 @@ public class MainActivity extends AppCompatActivity {
     private ArrayAdapter<String> categoryAdapter;
     NavigationView mNavigation;
 
+    RecyclerView apiEventList;
     private LinearLayoutManager layoutManager;
 
     private static int firstVisibleInListview;
@@ -147,15 +157,19 @@ public class MainActivity extends AppCompatActivity {
 
     boolean firstOpen;
 
+    EventsAdapter apiAdapter;
+
+    ArrayList<EventModel> mEventModel=new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mAdView = (AdView) findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
+//        mAdView = (AdView) findViewById(R.id.adView);
+//        AdRequest adRequest = new AdRequest.Builder().build();
+//        mAdView.loadAd(adRequest);
 
         sp = getSharedPreferences("EventX", MODE_PRIVATE);
         edit = sp.edit();
@@ -174,6 +188,8 @@ public class MainActivity extends AppCompatActivity {
         mFirebaseStorage = FirebaseStorage.getInstance();
         mDatabaseUsers = FirebaseDatabase.getInstance().getReference().child("Users");
 
+
+
         mDatabaseEvents = mFirebaseDatabase.getReference().child("Event");
 
         query = mDatabaseEvents.orderByChild("start_date_time");
@@ -190,7 +206,6 @@ public class MainActivity extends AppCompatActivity {
         mRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
         mCategorySpinner = (Spinner) findViewById(R.id.post_event_category);
         mLocationSpinner = (Spinner) findViewById(R.id.post_event_state);
-
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle mToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         mDrawerLayout.addDrawerListener(mToggle);
@@ -388,6 +403,10 @@ public class MainActivity extends AppCompatActivity {
 
                     startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + getPackageName())));
                 }
+                if (item.getItemId() == R.id.nav_notification) {
+                    Intent notificationIntent = new Intent(MainActivity.this, NotificationActiviity.class);
+                    startActivity(notificationIntent);
+                }
                 return true;
             }
         });
@@ -398,7 +417,17 @@ public class MainActivity extends AppCompatActivity {
 
         mEventList.setLayoutManager(layoutManager);
         mEventList.setHasFixedSize(true);
-
+//        apiEventList = (RecyclerView) findViewById(R.id.api_event_list);
+//
+//
+//        apiEventList.setLayoutManager(new LinearLayoutManager(this));
+//        apiEventList.setHasFixedSize(true);
+//        apiAdapter=new EventsAdapter(mEventModel,this);
+//
+//        apiEventList.setAdapter(apiAdapter);
+//
+//        apiEventList.setNestedScrollingEnabled(false);
+//        mEventList.setNestedScrollingEnabled(false);
 
         mEventList.addOnScrollListener(new RecyclerView.OnScrollListener() {
 
@@ -450,6 +479,7 @@ public class MainActivity extends AppCompatActivity {
                                     .setProviders(Arrays.asList(
                                             new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build(),
                                             new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build(),
+                                            new AuthUI.IdpConfig.Builder(AuthUI.PHONE_VERIFICATION_PROVIDER).build(),
                                             new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER).build()
                                     ))
                                     .build(), RC_SIGN_IN);
@@ -465,7 +495,42 @@ public class MainActivity extends AppCompatActivity {
                 mRefreshLayout.setRefreshing(false);
             }
         });
+
+        setNotificaionCount();
         setUpViews();
+
+
+    }
+
+    private void setNotificaionCount() {
+        if(mAuth.getCurrentUser()!=null) {
+
+            mNotificationRef = FirebaseDatabase.getInstance().getReference().child("Notification");
+            if(mNotificationRef!=null&&mNotificationRef.child(mAuth.getCurrentUser().getUid())!=null) {
+
+                mNotificationRef.child(mAuth.getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.getChildrenCount() > 0) {
+                            mNotificationCount = (TextView) findViewById(R.id.notification_count);
+
+                            mNotificationCount.setVisibility(View.VISIBLE);
+                            mNotificationCount.setText("You Have "+dataSnapshot.getChildrenCount()+" new Notifications");
+                        }else{
+                            mNotificationCount = (TextView) findViewById(R.id.notification_count);
+
+                            mNotificationCount.setVisibility(View.GONE);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
+        }
+
     }
 
     public void setChronJob() {
@@ -531,7 +596,6 @@ public class MainActivity extends AppCompatActivity {
             protected void populateViewHolder(EventViewHolder viewHolder, final Event model, final int position) {
 
                 temp = model;
-
                 final String post_key = getRef(position).getKey();
                 viewHolder.setName(model.getName());
                 viewHolder.setLocation(model.getVenue() + "," + model.getState());
@@ -614,7 +678,7 @@ public class MainActivity extends AppCompatActivity {
 
                                         if (ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
                                             String[] permissions = {Manifest.permission.WRITE_CALENDAR};
-                                            ActivityCompat.requestPermissions(MainActivity.this,permissions, 1);
+                                            ActivityCompat.requestPermissions(MainActivity.this, permissions, 1);
 
                                             return;
                                         }
@@ -652,6 +716,26 @@ public class MainActivity extends AppCompatActivity {
         };
         mEventList.setAdapter(firebaseRecyclerAdapter);
 
+
+//        ApiInterface apiInterface= ApiClient.getApiInterface();
+//        Call<Result> resultCall=apiInterface.getDelhiEvents();
+//        resultCall.enqueue(new retrofit2.Callback<Result>() {
+//            @Override
+//            public void onResponse(Call<Result> call, Response<Result> response) {
+//                if(response.isSuccessful()){
+//                    mEventModel.addAll(response.body().getEvents());
+//
+//                    apiAdapter.notifyDataSetChanged();
+//
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<Result> call, Throwable t) {
+//
+//            }
+//        });
+
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -669,6 +753,8 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+
     }
 
 
@@ -695,6 +781,7 @@ public class MainActivity extends AppCompatActivity {
         mNavigation.getMenu().findItem(R.id.nav_Rate_Us).setChecked(false);
         mNavigation.getMenu().findItem(R.id.nav_wish_list).setChecked(false);
         mNavigation.getMenu().findItem(R.id.nav_share).setChecked(false);
+        mNavigation.getMenu().findItem(R.id.nav_notification).setChecked(false);
 
 
         mAuth.addAuthStateListener(mAuthListener);

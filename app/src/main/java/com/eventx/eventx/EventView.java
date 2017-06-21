@@ -14,6 +14,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -53,6 +54,8 @@ public class EventView extends AppCompatActivity {
 
         if (getIntent().getExtras().getString("event_id") != null) {
             mPostKey = getIntent().getExtras().getString("event_id");
+            Log.i("lkjh", "onCreate: "+mPostKey);
+
         } else {
             Uri data = getIntent().getData();
             if (data.getQueryParameter("eventid") != null) {

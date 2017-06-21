@@ -60,25 +60,47 @@ public class EventCommentsFragment extends Fragment {
 
     private DatabaseReference mDatabaseUsers;
 
+    private DatabaseReference mDatabaseNotification;
+
     private FirebaseAuth mAuth;
+    private DatabaseReference mDatabaseEvents;
+
+    private String postUser;
+    private String eventName;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.event_comment_frag, container, false);
-        mAdView = (AdView) v.findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
+//        mAdView = (AdView) v.findViewById(R.id.adView);
+//        AdRequest adRequest = new AdRequest.Builder().build();
+//        mAdView.loadAd(adRequest);
 
         Bundle bundle = this.getArguments();
         if (bundle != null) {
             mPostKey = bundle.getString("post_key");
         }
-
+        mDatabaseEvents = FirebaseDatabase.getInstance().getReference().child("Event");
+        mDatabaseEvents.keepSynced(true);
+        mDatabaseNotification = FirebaseDatabase.getInstance().getReference().child("Notification");
+        mDatabaseNotification.keepSynced(true);
         mCommentReference = FirebaseDatabase.getInstance().getReference().child("Comment");
         mCommentReference.keepSynced(true);
         mDatabaseUsers = FirebaseDatabase.getInstance().getReference().child("Users");
         mDatabaseUsers.keepSynced(true);
+
+        mDatabaseEvents.child(mPostKey).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                postUser = (String) dataSnapshot.child("uid").getValue();
+                eventName = (String) dataSnapshot.child("name").getValue();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
         DatabaseReference mCommentEventRef = mCommentReference.child(mPostKey);
         query = mCommentEventRef.orderByChild("time");
@@ -96,6 +118,7 @@ public class EventCommentsFragment extends Fragment {
 
         mAddComment = (Button) v.findViewById(R.id.add_comment);
 
+
         mCommentList.setNestedScrollingEnabled(false);
         mAddComment.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -103,6 +126,15 @@ public class EventCommentsFragment extends Fragment {
                 String comment = mCommentBox.getText().toString().trim();
                 if (!TextUtils.isEmpty(comment)) {
                     mNoComments.setVisibility(View.GONE);
+
+
+                    if (!mAuth.getCurrentUser().getUid().equals(postUser)) {
+                        DatabaseReference notificationUser = mDatabaseNotification.child(postUser).child(mAuth.getCurrentUser().getUid());
+                        notificationUser.child("e_id").setValue(mPostKey);
+                        notificationUser.child("e_name").setValue(eventName);
+                        notificationUser.child("u_name").setValue(mAuth.getCurrentUser().getDisplayName());
+                    }
+
 
                     final DatabaseReference newCommentPost = mCommentReference.child(mPostKey).push();
                     newCommentPost.child("user_id").setValue(mAuth.getCurrentUser().getUid());
@@ -138,6 +170,7 @@ public class EventCommentsFragment extends Fragment {
         setUpComments();
         return v;
     }
+
     private void setUpComments() {
 
 
@@ -162,7 +195,8 @@ public class EventCommentsFragment extends Fragment {
                         mCommentReference.child(mPostKey).child(comment_key).addValueEventListener(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
-                                editText.setText(dataSnapshot.child("comment").getValue().toString());
+                                if (dataSnapshot.child("comment").getValue()!= null)
+                                    editText.setText(dataSnapshot.child("comment").getValue().toString());
                             }
 
                             @Override
@@ -180,8 +214,8 @@ public class EventCommentsFragment extends Fragment {
                         dialog.setPositiveButton("Done", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                if(editText.getText().toString().length()==0){
-                                    Snackbar.make(v,"Comment Can't be empty",Snackbar.LENGTH_SHORT).show();
+                                if (editText.getText().toString().length() == 0) {
+                                    Snackbar.make(v, "Comment Can't be empty", Snackbar.LENGTH_SHORT).show();
                                     return;
                                 }
                                 mCommentReference.child(mPostKey).child(comment_key).child("comment").setValue(editText.getText().toString().trim());
@@ -201,6 +235,9 @@ public class EventCommentsFragment extends Fragment {
                         dialog.setNegativeButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
+                                if (mDatabaseNotification != null && mDatabaseNotification.child(postUser) != null && mDatabaseNotification.child(postUser).child(mAuth.getCurrentUser().getUid()) != null) {
+                                    mDatabaseNotification.child(postUser).child(mAuth.getCurrentUser().getUid()).removeValue();
+                                }
                                 mCommentReference.child(mPostKey).child(comment_key).removeValue();
                             }
                         });
@@ -223,9 +260,9 @@ public class EventCommentsFragment extends Fragment {
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if(!dataSnapshot.hasChildren()){
+                if (!dataSnapshot.hasChildren()) {
                     mNoComments.setVisibility(View.VISIBLE);
-                }else{
+                } else {
                     mNoComments.setVisibility(View.GONE);
                 }
             }

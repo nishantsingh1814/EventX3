@@ -19,8 +19,8 @@ import android.widget.Toast;
 import com.eventx.eventx.MainActivity;
 import com.eventx.eventx.R;
 
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
+//import com.google.android.gms.ads.AdRequest;
+//import com.google.android.gms.ads.AdView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -56,7 +56,7 @@ public class EventAboutFragment extends Fragment {
     private String event_state;
     private String event_venue;
 
-    private AdView mAdView;
+//    private AdView mAdView;
 
     private DatabaseReference mDatabaseUsers;
 
@@ -65,9 +65,9 @@ public class EventAboutFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.event_about_fragment, container,false);
 
-        mAdView = (AdView) v.findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
+//        mAdView = (AdView) v.findViewById(R.id.adView);
+//        AdRequest adRequest = new AdRequest.Builder().build();
+//        mAdView.loadAd(adRequest);
 
         Bundle bundle = this.getArguments();
         if (bundle != null) {

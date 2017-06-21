@@ -15,7 +15,8 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity"
+        <activity
+            android:name=".MainActivity"
             android:theme="@style/EventTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -65,7 +66,8 @@
             android:enabled="true"
             android:exported="true" />
 
-        <activity android:name=".EventView"
+        <activity
+            android:name=".EventView"
             android:theme="@style/EventTheme">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -81,6 +83,7 @@
                     android:scheme="https" />
             </intent-filter>
         </activity>
+        <activity android:name=".NotificationActiviity"></activity>
     </application>
 
 </manifest>
