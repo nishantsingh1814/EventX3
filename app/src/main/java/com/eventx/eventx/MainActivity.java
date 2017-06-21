@@ -15,13 +15,8 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.net.Uri;
 
-import com.eventx.eventx.Adapter.EventsAdapter;
-import com.eventx.eventx.Model.EventModel;
-import com.eventx.eventx.Model.Result;
-import com.eventx.eventx.Network.ApiClient;
-import com.eventx.eventx.Network.ApiInterface;
-import com.facebook.FacebookSdk;
-import com.facebook.appevents.AppEventsLogger;
+
+
 
 import android.os.SystemClock;
 import android.provider.CalendarContract;
@@ -157,9 +152,9 @@ public class MainActivity extends AppCompatActivity {
 
     boolean firstOpen;
 
-    EventsAdapter apiAdapter;
 
-    ArrayList<EventModel> mEventModel=new ArrayList<>();
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

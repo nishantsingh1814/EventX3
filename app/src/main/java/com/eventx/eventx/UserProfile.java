@@ -144,10 +144,23 @@ public class UserProfile extends AppCompatActivity {
         mProfilePhoto = (ImageButton) findViewById(R.id.profile_photo_btn);
         mUserName = (TextView) findViewById(R.id.user_name);
 
+        mDatabaseUser.child(user.getUid()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(user.getProviders().toString().equals("[phone]")){
+                    mUserName.setText(dataSnapshot.child("username").getValue().toString());
+                }
+            }
 
-        mUserName.setText(user.getDisplayName());
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
 
-
+            }
+        });
+        if(!user.getProviders().toString().equals("[phone]")) {
+            mUserName.setText(user.getDisplayName());
+        }
+        Log.i("helpo",user.getProviders().toString());
         if (user.getPhotoUrl() != null) {
 
 

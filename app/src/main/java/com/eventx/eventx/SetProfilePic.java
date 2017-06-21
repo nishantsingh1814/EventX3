@@ -4,10 +4,13 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,6 +48,7 @@ public class SetProfilePic extends AppCompatActivity {
     private Uri resultUri;
     private String user_id;
 
+    private EditText mUserNameEt;
     SharedPreferences sp;
     SharedPreferences.Editor editor;
 
@@ -58,7 +62,7 @@ public class SetProfilePic extends AppCompatActivity {
         mDatabase = FirebaseDatabase.getInstance().getReference().child("Users");
         mAuth = FirebaseAuth.getInstance();
         mStorage = FirebaseStorage.getInstance().getReference().child("profile");
-
+        mUserNameEt=(EditText)findViewById(R.id.user_name_et);
         mProgress = new ProgressDialog(this);
 
         mProfileImageBtn = (ImageButton) findViewById(R.id.sign_up_profile_pic);
@@ -66,6 +70,10 @@ public class SetProfilePic extends AppCompatActivity {
         mAddImage = (TextView) findViewById(R.id.tv_add_image);
         user_id = mAuth.getCurrentUser().getUid();
 
+
+        if(mAuth.getCurrentUser().getProviders().toString().equals("[phone]")){
+            mUserNameEt.setVisibility(View.VISIBLE);
+        }
 
 
 
@@ -84,6 +92,16 @@ public class SetProfilePic extends AppCompatActivity {
 
                 if (resultUri != null) {
                     mProgress.show();
+                    if(mAuth.getCurrentUser().getProviders().toString().equals("[phone]")){
+                        String userName=mUserNameEt.getText().toString();
+                        if(!TextUtils.isEmpty(userName)) {
+                            DatabaseReference current_user_db = mDatabase.child(user_id);
+                            current_user_db.child("username").setValue(userName);
+                        }else{
+                            Snackbar.make(v,"Enter your name",Snackbar.LENGTH_SHORT).show();
+                            return;
+                        }
+                    }
                     StorageReference filePath = mStorage.child(resultUri.getLastPathSegment());
                     uploadTask = filePath.putFile(resultUri);
                     uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
@@ -102,6 +120,16 @@ public class SetProfilePic extends AppCompatActivity {
                         }
                     });
                 } else {
+                    if(mAuth.getCurrentUser().getProviders().toString().equals("[phone]")){
+                        String userName=mUserNameEt.getText().toString();
+                        if(!TextUtils.isEmpty(userName)) {
+                            DatabaseReference current_user_db = mDatabase.child(user_id);
+                            current_user_db.child("username").setValue(userName);
+                        }else{
+                            Snackbar.make(v,"Enter your name",Snackbar.LENGTH_SHORT).show();
+                            return;
+                        }
+                    }
                     Intent mainIntent = new Intent(SetProfilePic.this, MainActivity.class);
                     mainIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(mainIntent);
