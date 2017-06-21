@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +17,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.eventx.eventx.ChatActivity;
 import com.eventx.eventx.MainActivity;
 import com.eventx.eventx.R;
 
@@ -56,6 +58,8 @@ public class EventAboutFragment extends Fragment {
     private String event_state;
     private String event_venue;
 
+    private FloatingActionButton mChatFab;
+
 //    private AdView mAdView;
 
     private DatabaseReference mDatabaseUsers;
@@ -79,6 +83,7 @@ public class EventAboutFragment extends Fragment {
         mDatabaseEvents.keepSynced(true);
         mAuth = FirebaseAuth.getInstance();
 
+        mChatFab=(FloatingActionButton)v.findViewById(R.id.chat_fab);
         eventName = (TextView) v.findViewById(R.id.view_event_name);
         eventDate = (TextView) v.findViewById(R.id.view_event_date);
         eventVenue = (TextView) v.findViewById(R.id.view_event_venue);
@@ -104,6 +109,7 @@ public class EventAboutFragment extends Fragment {
 
             }
         });
+
 
         mDatabaseEvents.child(mPostKey).addValueEventListener(new ValueEventListener() {
             @Override
@@ -153,6 +159,15 @@ public class EventAboutFragment extends Fragment {
             }
         });
 
+        mChatFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(getContext(), ChatActivity.class);
+
+                intent.putExtra("event_id", mPostKey);
+                startActivity(intent);
+            }
+        });
         mRemoveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
