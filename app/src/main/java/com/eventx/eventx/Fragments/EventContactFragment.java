@@ -28,7 +28,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import static com.twitter.sdk.android.core.TwitterCore.TAG;
 
 /**
  * Created by Nishant on 4/28/2017.

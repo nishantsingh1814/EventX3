@@ -206,7 +206,7 @@
             android:background="#607D8B"
             android:padding="8dp"
             android:text="Remove this Event"
-            android:textColor="@color/tw__composer_white"
+            android:textColor="@color/colorIcons"
             android:visibility="gone" />
         <!--<com.google.android.gms.ads.AdView-->
             <!--android:id="@+id/adView"-->
