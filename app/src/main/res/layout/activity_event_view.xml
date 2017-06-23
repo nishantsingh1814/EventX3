@@ -66,6 +66,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/chat_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="16dp"
+        android:src="@drawable/ic_chat"
+        android:layout_gravity="bottom|right"
+        />
 
 
 </android.support.design.widget.CoordinatorLayout>

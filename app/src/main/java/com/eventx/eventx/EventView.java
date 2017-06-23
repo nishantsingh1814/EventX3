@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -34,6 +35,7 @@ import java.util.Date;
 
 import static android.R.attr.fragment;
 import static com.eventx.eventx.R.array.event_category;
+import static java.security.AccessController.getContext;
 
 public class EventView extends AppCompatActivity {
 
@@ -44,6 +46,7 @@ public class EventView extends AppCompatActivity {
 
     private String event_image;
 
+    private FloatingActionButton mChatFab;
     private String mPostKey;
     private DatabaseReference mDatabaseEvents;
 
@@ -78,7 +81,7 @@ public class EventView extends AppCompatActivity {
 
         mViewPager = (ViewPager) findViewById(R.id.view_pager);
         mTablayout = (TabLayout) findViewById(R.id.tab_layout);
-
+        mChatFab=(FloatingActionButton)findViewById(R.id.chat_fab);
         mViewPager.setAdapter(new PageAdapter(getSupportFragmentManager()));
 
         mTablayout.setupWithViewPager(mViewPager);
@@ -99,6 +102,15 @@ public class EventView extends AppCompatActivity {
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
+            }
+        });
+        mChatFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(EventView.this, ChatActivity.class);
+
+                intent.putExtra("event_id", mPostKey);
+                startActivity(intent);
             }
         });
         mEventImage.setOnClickListener(new View.OnClickListener() {

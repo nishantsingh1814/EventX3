@@ -58,7 +58,7 @@ public class EventAboutFragment extends Fragment {
     private String event_state;
     private String event_venue;
 
-    private FloatingActionButton mChatFab;
+
 
 //    private AdView mAdView;
 
@@ -83,7 +83,7 @@ public class EventAboutFragment extends Fragment {
         mDatabaseEvents.keepSynced(true);
         mAuth = FirebaseAuth.getInstance();
 
-        mChatFab=(FloatingActionButton)v.findViewById(R.id.chat_fab);
+
         eventName = (TextView) v.findViewById(R.id.view_event_name);
         eventDate = (TextView) v.findViewById(R.id.view_event_date);
         eventVenue = (TextView) v.findViewById(R.id.view_event_venue);
@@ -159,15 +159,7 @@ public class EventAboutFragment extends Fragment {
             }
         });
 
-        mChatFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent=new Intent(getContext(), ChatActivity.class);
 
-                intent.putExtra("event_id", mPostKey);
-                startActivity(intent);
-            }
-        });
         mRemoveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
